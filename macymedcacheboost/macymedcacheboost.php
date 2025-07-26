@@ -21,7 +21,7 @@ class MacymedCacheBoost extends Module
     {
         $this->name = 'macymedcacheboost';
         $this->tab = 'IMPROVE';
-        $this->version = '1.3.6';
+        $this->version = '1.3.7';
         $this->author = 'Macymed';
         $this->need_instance = 0;
         $this->bootstrap = true;
