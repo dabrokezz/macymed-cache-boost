@@ -41,7 +41,10 @@ class MacymedCacheBoost extends Module
         try {
         $cacheDir = _PS_MODULE_DIR_ . $this->name . '/cache/';
         if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
+            if (!mkdir($cacheDir, 0755, true) && !is_dir($cacheDir)) {
+                $this->_errors[] = $this->l('Could not create cache directory: ') . $cacheDir;
+                return false;
+            }
         }
 
         $config_success = ConfigurationService::update('CACHEBOOST_ENABLED', true)
