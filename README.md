@@ -32,3 +32,7 @@ After installation, a new entry appears in the **Improve** section. The configur
 
 Symfony controllers are registered as services in `config/services.yml` and their routes are defined in `config/routes.yml`. PrestaShop loads these files automatically, allowing the module to add its own admin controllers with URLs such as `/macymedcacheboost/dashboard` or `/macymedcacheboost/general`.
 
+
+## License
+
+Macymed CacheBoost is distributed under the [Open Software License 3.0](LICENSE).
