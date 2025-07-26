@@ -1,13 +1,16 @@
 <?php
 
+namespace MacymedCacheBoost\Controller\Admin;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use ModuleAdminController;
 use MacymedCacheBoost\Services\AdminConfigurationHandlerService;
 use MacymedCacheBoost\Services\ConfigurationService;
 
-class AdminMacymedCacheBoostBotsController extends ModuleAdminController
+class AdminMacymedCacheBoostMemcachedController extends ModuleAdminController
 {
     public function __construct()
     {
@@ -19,7 +22,7 @@ class AdminMacymedCacheBoostBotsController extends ModuleAdminController
     {
         parent::initContent();
         $this->assignVariablesToSmartyTpl();
-        $this->setTemplate('adminmacymedcacheboostbots.tpl');
+        $this->setTemplate('adminmacymedcacheboostmemcached.tpl');
     }
 
     public function postProcess()

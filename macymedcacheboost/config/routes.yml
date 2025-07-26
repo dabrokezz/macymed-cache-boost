@@ -1,0 +1,44 @@
+macymedcacheboost_dashboard:
+    path: /macymedcacheboost/dashboard
+    controller: macymedcacheboost.controller.admin.dashboard
+    methods: [GET]
+
+macymedcacheboost_general:
+    path: /macymedcacheboost/general
+    controller: macymedcacheboost.controller.admin.general
+    methods: [GET, POST]
+
+macymedcacheboost_bots:
+    path: /macymedcacheboost/bots
+    controller: macymedcacheboost.controller.admin.bots
+    methods: [GET, POST]
+
+macymedcacheboost_assets:
+    path: /macymedcacheboost/assets
+    controller: macymedcacheboost.controller.admin.assets
+    methods: [GET, POST]
+
+macymedcacheboost_pagetypes:
+    path: /macymedcacheboost/pagetypes
+    controller: macymedcacheboost.controller.admin.pagetypes
+    methods: [GET, POST]
+
+macymedcacheboost_redis:
+    path: /macymedcacheboost/redis
+    controller: macymedcacheboost.controller.admin.redis
+    methods: [GET, POST]
+
+macymedcacheboost_memcached:
+    path: /macymedcacheboost/memcached
+    controller: macymedcacheboost.controller.admin.memcached
+    methods: [GET, POST]
+
+macymedcacheboost_invalidation:
+    path: /macymedcacheboost/invalidation
+    controller: macymedcacheboost.controller.admin.invalidation
+    methods: [GET, POST]
+
+macymedcacheboost_warmer:
+    path: /macymedcacheboost/warmer
+    controller: macymedcacheboost.controller.admin.warmer
+    methods: [GET, POST]

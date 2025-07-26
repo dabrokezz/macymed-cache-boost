@@ -1,14 +1,16 @@
 <?php
 
+namespace MacymedCacheBoost\Controller\Admin;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use MacymedCacheBoost\Services\AdminAjaxHandlerService;
+use ModuleAdminController;
+use MacymedCacheBoost\Services\AdminConfigurationHandlerService;
 use MacymedCacheBoost\Services\ConfigurationService;
-use Tools;
 
-class AdminMacymedCacheBoostInvalidationController extends ModuleAdminController
+class AdminMacymedCacheBoostGeneralController extends ModuleAdminController
 {
     public function __construct()
     {
@@ -20,15 +22,13 @@ class AdminMacymedCacheBoostInvalidationController extends ModuleAdminController
     {
         parent::initContent();
         $this->assignVariablesToSmartyTpl();
-        $this->setTemplate('adminmacymedcacheboostinvalidation.tpl');
+        $this->setTemplate('adminmacymedcacheboostgeneral.tpl');
     }
 
-    public function ajaxProcess($action = null)
+    public function postProcess()
     {
-        if ($action === null) {
-            $action = Tools::getValue('action');
-        }
-        AdminAjaxHandlerService::handleAjaxRequest($action, $this->context);
+        AdminConfigurationHandlerService::handleForm($this->token, $this);
+        return parent::postProcess();
     }
 
     private function assignVariablesToSmartyTpl()

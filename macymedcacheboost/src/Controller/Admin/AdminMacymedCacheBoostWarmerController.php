@@ -1,9 +1,12 @@
 <?php
 
+namespace MacymedCacheBoost\Controller\Admin;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use ModuleAdminController;
 use MacymedCacheBoost\Services\AdminAjaxHandlerService;
 use MacymedCacheBoost\Services\ConfigurationService;
 use MacymedCacheBoost\Services\WarmingQueueService;

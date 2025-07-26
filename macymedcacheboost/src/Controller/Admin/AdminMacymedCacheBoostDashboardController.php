@@ -1,11 +1,17 @@
 <?php
 
+namespace MacymedCacheBoost\Controller\Admin;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use ModuleAdminController;
 use MacymedCacheBoost\Services\ConfigurationService;
 use PrestaShopLogger;
+use Redis;
+use Context;
+use Dispatcher;
 
 class AdminMacymedCacheBoostDashboardController extends ModuleAdminController
 {

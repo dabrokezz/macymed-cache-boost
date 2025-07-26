@@ -1,0 +1,24 @@
+{
+    "name": "macymed/macymedcacheboost",
+    "description": "A powerful and safe cache module for PrestaShop 8.1+",
+    "type": "prestashop-module",
+    "license": "OSL-3.0",
+    "authors": [
+        {
+            "name": "Macymed",
+            "email": "contact@macymed.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "MacymedCacheBoost\\": "src/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "optimize-autoloader": true
+    }
+}

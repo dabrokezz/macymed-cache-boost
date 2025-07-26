@@ -77,8 +77,10 @@ class WarmingQueueService
             curl_setopt($ch, CURLOPT_HEADER, true);
             curl_setopt($ch, CURLOPT_NOBODY, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            // IMPORTANT: SSL verification is enabled for production readiness.
+            // Ensure your server has a valid CA certificate bundle for cURL to function correctly.
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // 2 means verify that the Common Name field in the SSL certificate matches the hostname provided.
             // Set a specific user agent to ensure it's treated as a cacheable visit
             curl_setopt($ch, CURLOPT_USERAGENT, 'MacymedCacheBoost-Warmer/1.0');
 

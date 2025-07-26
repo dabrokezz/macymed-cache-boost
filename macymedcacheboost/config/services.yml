@@ -1,0 +1,54 @@
+services:
+    macymedcacheboost.controller.admin.dashboard:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostDashboardController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.general:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostGeneralController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.bots:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostBotsController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.assets:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostAssetsController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.pagetypes:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostPageTypesController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.redis:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostRedisController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.memcached:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostMemcachedController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.invalidation:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostInvalidationController
+        public: true
+        tags:
+            - { name: controller.service_arguments }
+
+    macymedcacheboost.controller.admin.warmer:
+        class: MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostWarmerController
+        public: true
+        tags:
+            - { name: controller.service_arguments }

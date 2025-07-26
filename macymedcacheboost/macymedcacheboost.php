@@ -27,12 +27,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/classes/CacheManager.php';
-require_once __DIR__ . '/services/ConfigurationService.php';
-require_once __DIR__ . '/services/WarmingQueueService.php';
-require_once __DIR__ . '/services/AdminConfigurationHandlerService.php';
-require_once __DIR__ . '/services/AdminAjaxHandlerService.php';
-
 use MacymedCacheBoost\CacheManager;
 use MacymedCacheBoost\Services\CacheService;
 use MacymedCacheBoost\Services\ConfigurationService;
@@ -47,8 +41,8 @@ class MacymedCacheBoost extends Module
     public function __construct()
     {
         $this->name = 'macymedcacheboost';
-        $this->tab = 'administration';
-        $this->version = '1.2.1'; // Version incrémentée
+        $this->tab = 'IMPROVE';
+        $this->version = '1.3.2'; // Version incrémentée
         $this->author = 'Macymed';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -69,8 +63,6 @@ class MacymedCacheBoost extends Module
         }
         if (
             !parent::install()
-            || !$this->uninstallTabs() // Ensure old tabs are removed first
-            || !$this->installTabs()
             || !ConfigurationService::update('CACHEBOOST_ENABLED', true)
             || !ConfigurationService::update('CACHEBOOST_ENABLE_DEV_MODE', false)
             || !ConfigurationService::update('CACHEBOOST_COMPRESSION_ENABLED', true)
@@ -133,91 +125,80 @@ class MacymedCacheBoost extends Module
 
         CacheManager::uninstallCache();
 
-        try {
-            return parent::uninstall() && $this->uninstallTabs();
-        } catch (\Exception $e) {
-            PrestaShopLogger::addLog('MacymedCacheBoost: Error during module uninstall: ' . $e->getMessage(), 3);
-            return false;
-        }
+        return parent::uninstall();
     }
 
-    private function installTabs()
+    public function getTabs()
     {
-        $parentTab = new Tab();
-        $parentTab->active = true;
-        $parentTab->class_name = 'AdminMacymedCacheBoost';
-        $parentTab->name = [];
-        foreach (Language::getLanguages(true) as $lang) {
-            $parentTab->name[$lang['id_lang']] = 'Macymed CacheBoost';
-        }
-        $parentTab->id_parent = (int)Tab::getIdFromClassName('AdminParentModulesSf'); // Changed parent to Modules
-        $parentTab->module = $this->name;
-        $parentTab->add();
-
-        $tabs = [
-            'AdminMacymedCacheBoostDashboard' => 'Dashboard',
-            'AdminMacymedCacheBoostGeneral' => 'General Settings',
-            'AdminMacymedCacheBoostBots' => 'Bot Settings',
-            'AdminMacymedCacheBoostAssets' => 'Asset Cache',
-            'AdminMacymedCacheBoostPageTypes' => 'Page Type Cache',
-            'AdminMacymedCacheBoostRedis' => 'Redis Settings',
-            'AdminMacymedCacheBoostMemcached' => 'Memcached Settings',
-            'AdminMacymedCacheBoostInvalidation' => 'Granular Invalidation',
-            'AdminMacymedCacheBoostWarmer' => 'Cache Warmer',
+        return [
+            [
+                'name' => 'Macymed CacheBoost',
+                'class_name' => 'AdminMacymedCacheBoost',
+                'visible' => true,
+                'parent_class_name' => 'AdminParentImprove',
+                'module' => $this->name,
+                'icon' => 'tune',
+            ],
+            [
+                'name' => 'Dashboard',
+                'class_name' => 'AdminMacymedCacheBoostDashboard',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'General Settings',
+                'class_name' => 'AdminMacymedCacheBoostGeneral',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'Bot Settings',
+                'class_name' => 'AdminMacymedCacheBoostBots',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'Asset Cache',
+                'class_name' => 'AdminMacymedCacheBoostAssets',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'Page Type Cache',
+                'class_name' => 'AdminMacymedCacheBoostPageTypes',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'Redis Settings',
+                'class_name' => 'AdminMacymedCacheBoostRedis',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'Memcached Settings',
+                'class_name' => 'AdminMacymedCacheBoostMemcached',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'Granular Invalidation',
+                'class_name' => 'AdminMacymedCacheBoostInvalidation',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
+            [
+                'name' => 'Cache Warmer',
+                'class_name' => 'AdminMacymedCacheBoostWarmer',
+                'visible' => true,
+                'parent_class_name' => 'AdminMacymedCacheBoost',
+            ],
         ];
-
-        foreach ($tabs as $className => $tabName) {
-            $tab = new Tab();
-            $tab->active = true;
-            $tab->class_name = $className;
-            $tab->name = [];
-            foreach (Language::getLanguages(true) as $lang) {
-                $tab->name[$lang['id_lang']] = $tabName;
-            }
-            $tab->id_parent = $parentTab->id;
-            $tab->module = $this->name;
-            $tab->add();
-        }
-
-        return true;
-    }
-
-    private function uninstallTabs()
-    {
-        $tabRepository = $this->get('prestashop.core.admin.tab.repository');
-        $classes = [
-            'AdminMacymedCacheBoost',
-            'AdminMacymedCacheBoostDashboard',
-            'AdminMacymedCacheBoostGeneral',
-            'AdminMacymedCacheBoostBots',
-            'AdminMacymedCacheBoostAssets',
-            'AdminMacymedCacheBoostPageTypes',
-            'AdminMacymedCacheBoostRedis',
-            'AdminMacymedCacheBoostMemcached',
-            'AdminMacymedCacheBoostInvalidation',
-            'AdminMacymedCacheBoostWarmer',
-            'AdminMacymedCacheBoostConfig', // Add the old single config tab class name
-        ];
-
-        foreach ($classes as $className) {
-            try {
-                $id_tab = $tabRepository->findOneByClassName($className);
-                if ($id_tab) {
-                    $tab = new Tab($id_tab->getId());
-                    $tab->delete();
-                }
-            } catch (\Exception $e) {
-                // Log the error but continue with other tab deletions
-                PrestaShopLogger::addLog('MacymedCacheBoost: Failed to uninstall tab ' . $className . ': ' . $e->getMessage(), 3);
-            }
-        }
-
-        return true;
     }
 
     public function getContent()
     {
-        Tools::redirectAdmin($this->context->link->getAdminLink('AdminMacymedCacheBoostDashboard'));
+        Tools::redirectAdmin($this->get('router')->generate('macymedcacheboost_dashboard'));
     }
 
     public function hookActionDispatcherBefore($params)

@@ -132,102 +132,113 @@ class CacheManager
         return $key;
     }
 
+    private static function shouldBypassCache()
+    {
+        // Always exclude admin pages
+        if (defined('_PS_ADMIN_DIR_') || strpos($_SERVER['REQUEST_URI'], '/admin') !== false) {
+            return true;
+        }
+
+        // Always exclude POST requests
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            return true;
+        }
+
+        // Always exclude URLs with common token patterns
+        foreach (self::$token_patterns as $pattern) {
+            if (strpos($_SERVER['REQUEST_URI'], $pattern) !== false) {
+                return true;
+            }
+        }
+
+        // Always exclude user-defined patterns
+        $user_excluded = ConfigurationService::get('CACHEBOOST_EXCLUDE');
+        if ($user_excluded) {
+            foreach (explode(',', $user_excluded) as $pattern) {
+                if (preg_match('#' . trim($pattern) . '#', $_SERVER['REQUEST_URI'])) {
+                    return true;
+                }
+            }
+        }
+
+        $is_ajax_request = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        $is_from_xhr = isset($_GET['from-xhr']);
+
+        // Handle AJAX requests
+        if ($is_ajax_request) {
+            if (!ConfigurationService::get('CACHEBOOST_CACHE_AJAX')) { // If AJAX caching is disabled
+                return true;
+            }
+            if ($is_from_xhr && ConfigurationService::get('CACHEBOOST_CACHE_AJAX')) {
+                self::$isAjaxJsonRequest = true;
+            }
+        }
+
+        // Check if the request is from a known bot
+        $is_bot = false;
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            $user_agent = $_SERVER['HTTP_USER_AGENT'];
+            foreach (self::$bot_user_agents as $bot_ua) {
+                if (stripos($user_agent, $bot_ua) !== false) {
+                    $is_bot = true;
+                    break;
+                }
+            }
+        }
+
+        // Check for asset caching
+        if (ConfigurationService::get('CACHEBOOST_ASSET_CACHE_ENABLED')) {
+            $request_uri = $_SERVER['REQUEST_URI'];
+            $path_info = pathinfo($request_uri);
+            $extension = isset($path_info['extension']) ? strtolower($path_info['extension']) : '';
+
+            $allowed_extensions_str = ConfigurationService::get('CACHEBOOST_ASSET_EXTENSIONS');
+            $allowed_extensions = array_map('trim', explode(',', $allowed_extensions_str));
+
+            if (in_array($extension, $allowed_extensions)) {
+                self::serveAssetCache();
+                return true; // Asset served or will be captured
+            }
+        }
+
+        // Main cache bypass logic
+        if (!ConfigurationService::get('CACHEBOOST_ENABLED')) {
+            return true;
+        }
+
+        $context = Context::getContext();
+
+        // Apply these bypasses only for non-bot requests
+        if (!$is_bot) {
+            if (defined('_PS_MODE_DEV_') && _PS_MODE_DEV_ && !ConfigurationService::get('CACHEBOOST_ENABLE_DEV_MODE')) {
+                return true;
+            }
+            if ($context->customer->isLogged() || ($context->employee && $context->employee->isLoggedBack())) {
+                return true;
+            }
+            if (isset($_COOKIE['nocache']) || isset($_GET['nocache'])) {
+                return true;
+            }
+            if (isset($_COOKIE['PrestaShop-' . $context->shop->id])) {
+                return true;
+            }
+        } else { // If it's a bot, force guest context
+            $context->customer = new \Customer(); // Create a new empty customer object
+            $context->employee = null; // Ensure no employee is logged in
+        }
+
+        return false;
+    }
+
     public static function checkAndServeCache()
     {
         try {
-            // Always exclude admin pages
-            if (defined('_PS_ADMIN_DIR_') || strpos($_SERVER['REQUEST_URI'], '/admin') !== false) {
-                return;
-            }
-
-            // Always exclude POST requests
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                return;
-            }
-
-            // Always exclude URLs with common token patterns
-            foreach (self::$token_patterns as $pattern) {
-                if (strpos($_SERVER['REQUEST_URI'], $pattern) !== false) {
-                    return;
-                }
-            }
-
-            // Always exclude user-defined patterns
-            $user_excluded = ConfigurationService::get('CACHEBOOST_EXCLUDE');
-            if ($user_excluded) {
-                foreach (explode(',', $user_excluded) as $pattern) {
-                    if (preg_match('#' . trim($pattern) . '#', $_SERVER['REQUEST_URI'])) {
-                        return;
-                    }
-                }
-            }
-
-            $is_ajax_request = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
-            $is_from_xhr = isset($_GET['from-xhr']);
-
-            // Handle AJAX requests
-            if ($is_ajax_request) {
-                if (!ConfigurationService::get('CACHEBOOST_CACHE_AJAX')) { // If AJAX caching is disabled
-                    return;
-                }
-                if ($is_from_xhr && ConfigurationService::get('CACHEBOOST_CACHE_AJAX')) {
-                    self::$isAjaxJsonRequest = true;
-                }
-            }
-
-            // Check if the request is from a known bot
-            $is_bot = false;
-            if (isset($_SERVER['HTTP_USER_AGENT'])) {
-                $user_agent = $_SERVER['HTTP_USER_AGENT'];
-                foreach (self::$bot_user_agents as $bot_ua) {
-                    if (stripos($user_agent, $bot_ua) !== false) {
-                        $is_bot = true;
-                        break;
-                    }
-                }
-            }
-
-            // Check for asset caching
-            if (ConfigurationService::get('CACHEBOOST_ASSET_CACHE_ENABLED')) {
-                $request_uri = $_SERVER['REQUEST_URI'];
-                $path_info = pathinfo($request_uri);
-                $extension = isset($path_info['extension']) ? strtolower($path_info['extension']) : '';
-
-                $allowed_extensions_str = ConfigurationService::get('CACHEBOOST_ASSET_EXTENSIONS');
-                $allowed_extensions = array_map('trim', explode(',', $allowed_extensions_str));
-
-                if (in_array($extension, $allowed_extensions)) {
-                    self::serveAssetCache();
-                    return; // Asset served or will be captured
-                }
-            }
-
-            // Main cache bypass logic
-            if (!ConfigurationService::get('CACHEBOOST_ENABLED')) {
+            if (self::shouldBypassCache()) {
                 return;
             }
 
             $context = Context::getContext();
             $controller = strtolower(Dispatcher::getInstance()->getController());
-
-            // Apply these bypasses only for non-bot requests
-            if (!$is_bot) {
-                if (defined('_PS_MODE_DEV_') && _PS_MODE_DEV_ && !ConfigurationService::get('CACHEBOOST_ENABLE_DEV_MODE')) {
-                    return;
-                }
-                if ($context->customer->isLogged() || ($context->employee && $context->employee->isLoggedBack())) {
-                    return;
-                }
-                if (isset($_COOKIE['nocache']) || isset($_GET['nocache'])) {
-                    return;
-                }
-                if (isset($_COOKIE['PrestaShop-' . $context->shop->id])) {
-                    return;
-                }
-            } else { // If it's a bot, force guest context
-                $context->customer = new \Customer(); // Create a new empty customer object
-                $context->employee = null; // Ensure no employee is logged in
-            }
 
             // Page type specific caching
             $cache_page = false;
@@ -368,6 +379,73 @@ class CacheManager
 
     
 
+    private static function getFilesystemCachePath($key)
+    {
+        return _PS_MODULE_DIR_ . 'macymedcacheboost/cache/html/' . str_replace('macymedcacheboost:', '', $key) . '.html';
+    }
+
+    private static function purgeOldAndLargeCache()
+    {
+        $purgeAge = (int) ConfigurationService::get('CACHEBOOST_PURGE_AGE', 0);
+        $purgeSize = (int) ConfigurationService::get('CACHEBOOST_PURGE_SIZE', 0);
+
+        if ($purgeAge === 0 && $purgeSize === 0) {
+            return; // Purging is disabled
+        }
+
+        $cache_dir = _PS_MODULE_DIR_ . 'macymedcacheboost/cache/html';
+        if (!is_dir($cache_dir)) {
+            return;
+        }
+
+        $files = glob($cache_dir . '/*.html');
+        if ($files === false) {
+            return;
+        }
+
+        $current_size = 0;
+        $files_to_delete = [];
+
+        foreach ($files as $file) {
+            if (!is_file($file)) {
+                continue;
+            }
+            $file_size = filesize($file);
+            $file_mtime = filemtime($file);
+
+            // Check for age
+            if ($purgeAge > 0 && (time() - $file_mtime) > $purgeAge) {
+                $files_to_delete[] = $file;
+            } else {
+                $current_size += $file_size;
+            }
+        }
+
+        // Check for size (delete oldest first if over limit)
+        if ($purgeSize > 0 && $current_size > ($purgeSize * 1024 * 1024)) { // Convert MB to bytes
+            // Sort files by modification time (oldest first)
+            usort($files, function ($a, $b) {
+                return filemtime($a) - filemtime($b);
+            });
+
+            foreach ($files as $file) {
+                if ($current_size <= ($purgeSize * 1024 * 1024)) {
+                    break; // Size limit reached
+                }
+                if (!in_array($file, $files_to_delete)) {
+                    $files_to_delete[] = $file;
+                    $current_size -= filesize($file);
+                }
+            }
+        }
+
+        foreach ($files_to_delete as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+    }
+
     public static function invalidateAll()
     {
         $engine = self::getEngine();
@@ -455,7 +533,7 @@ class CacheManager
         rmdir($dir);
     }
 
-    public static function serveAssetCache()
+    private static function isAssetCacheEnabledAndAllowed(&$extension)
     {
         if (!ConfigurationService::get('CACHEBOOST_ASSET_CACHE_ENABLED')) {
             return false;
@@ -468,19 +546,31 @@ class CacheManager
         $allowed_extensions_str = ConfigurationService::get('CACHEBOOST_ASSET_EXTENSIONS');
         $allowed_extensions = array_map('trim', explode(',', $allowed_extensions_str));
 
-        if (!in_array($extension, $allowed_extensions)) {
+        return in_array($extension, $allowed_extensions);
+    }
+
+    private static function serveCachedAsset($cached_asset, $extension)
+    {
+        header('X-CacheBoost-Asset: HIT');
+        header('Content-Type: ' . self::getMimeType($extension));
+        header('Cache-Control: public, max-age=' . (int) ConfigurationService::get('CACHEBOOST_ASSET_DURATION'));
+        echo $cached_asset;
+        exit;
+    }
+
+    public static function serveAssetCache()
+    {
+        $extension = '';
+        if (!self::isAssetCacheEnabledAndAllowed($extension)) {
             return false;
         }
 
+        $request_uri = $_SERVER['REQUEST_URI'];
         $asset_key = 'macymedcacheboost_asset:' . md5($request_uri);
         $cached_asset = self::get($asset_key);
 
         if ($cached_asset) {
-            header('X-CacheBoost-Asset: HIT');
-            header('Content-Type: ' . self::getMimeType($extension));
-            header('Cache-Control: public, max-age=' . (int) ConfigurationService::get('CACHEBOOST_ASSET_DURATION'));
-            echo $cached_asset;
-            exit;
+            self::serveCachedAsset($cached_asset, $extension);
         }
 
         // If not in cache, capture output and store it
