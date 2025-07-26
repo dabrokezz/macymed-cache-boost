@@ -8,7 +8,8 @@ class ConfigurationService
 {
     public static function get($key, $default = null)
     {
-        return Configuration::get($key, null, null, $default);
+        $value = Configuration::get($key);
+        return ($value === false || $value === null) ? $default : $value;
     }
 
     public static function update($key, $value)
