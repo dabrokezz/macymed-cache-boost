@@ -31,115 +31,196 @@ class MacymedCacheBoost extends Module
 
     public function install()
     {
-        $hook_success = false;
-        $config_success = false;
         try {
+            // Vérification des prérequis
+            if (version_compare(_PS_VERSION_, '8.1.0', '<')) {
+                $this->_errors[] = $this->l('This module requires PrestaShop 8.1.0 or higher.');
+                return false;
+            }
+
+            // Création du répertoire cache
             $cacheDir = _PS_MODULE_DIR_ . $this->name . '/cache/';
-            if (!is_dir($cacheDir)) {
-                if (!mkdir($cacheDir, 0755, true) && !is_dir($cacheDir)) {
-                    $this->_errors[] = $this->l('Could not create cache directory: ') . $cacheDir;
+            if (!$this->createCacheDirectory($cacheDir)) {
+                return false;
+            }
+
+            // Configuration par défaut
+            if (!$this->installConfiguration()) {
+                return false;
+            }
+
+            // Enregistrement des hooks
+            if (!$this->installHooks()) {
+                return false;
+            }
+
+            // Installation des onglets
+            if (!$this->installTabs()) {
+                return false;
+            }
+
+            Tools::clearAllCache();
+            return parent::install();
+
+        } catch (\Exception $e) {
+            PrestaShopLogger::addLog('[CacheBoost] Installation error: ' . $e->getMessage(), 3);
+            $this->_errors[] = $this->l('Installation failed: ') . $e->getMessage();
+            return false;
+        }
+    }
+
+    private function createCacheDirectory($cacheDir)
+    {
+        if (!is_dir($cacheDir)) {
+            if (!mkdir($cacheDir, 0755, true) && !is_dir($cacheDir)) {
+                $this->_errors[] = $this->l('Could not create cache directory: ') . $cacheDir;
+                return false;
+            }
+        }
+
+        // Créer les sous-répertoires nécessaires
+        $subDirs = ['html', 'assets'];
+        foreach ($subDirs as $subDir) {
+            $fullPath = $cacheDir . $subDir . '/';
+            if (!is_dir($fullPath)) {
+                if (!mkdir($fullPath, 0755, true) && !is_dir($fullPath)) {
+                    $this->_errors[] = $this->l('Could not create cache subdirectory: ') . $fullPath;
                     return false;
                 }
             }
-
-            $config_success = ConfigurationService::update('CACHEBOOST_ENABLED', true)
-                && ConfigurationService::update('CACHEBOOST_ENABLE_DEV_MODE', false)
-                && ConfigurationService::update('CACHEBOOST_COMPRESSION_ENABLED', true)
-                && ConfigurationService::update('CACHEBOOST_CACHE_AJAX', false)
-                && ConfigurationService::update('CACHEBOOST_BOT_CACHE_ENABLED', true)
-                && ConfigurationService::update('CACHEBOOST_BOT_USER_AGENTS', 'Lighthouse,Googlebot,Bingbot,Slurp,DuckDuckBot,Baiduspider,YandexBot,AhrefsBot,SemrushBot,DotBot,Exabot,MJ12bot,Screaming Frog SEO Spider,Wget,curl')
-                && ConfigurationService::update('CACHEBOOST_ASSET_CACHE_ENABLED', false)
-                && ConfigurationService::update('CACHEBOOST_ASSET_EXTENSIONS', 'js,css,png,jpg,jpeg,gif,webp,svg')
-                && ConfigurationService::update('CACHEBOOST_ASSET_DURATION', 86400)
-                && ConfigurationService::update('CACHEBOOST_CACHE_HOMEPAGE', true)
-                && ConfigurationService::update('CACHEBOOST_CACHE_CATEGORY', true)
-                && ConfigurationService::update('CACHEBOOST_CACHE_PRODUCT', true)
-                && ConfigurationService::update('CACHEBOOST_CACHE_CMS', true)
-                && ConfigurationService::update('CACHEBOOST_AUTO_WARMUP', true)
-                && ConfigurationService::update('CACHEBOOST_PURGE_AGE', 0)
-                && ConfigurationService::update('CACHEBOOST_PURGE_SIZE', 0);
-
-            $hook_success = $this->registerHook('actionDispatcherBefore')
-                && $this->registerHook('actionProductUpdate')
-                && $this->registerHook('actionObjectProductDeleteAfter')
-                && $this->registerHook('actionObjectCategoryUpdateAfter')
-                && $this->registerHook('actionObjectCategoryDeleteAfter')
-                && $this->registerHook('actionAdminCmsPageUpdateAfter')
-                && $this->registerHook('actionObjectCmsDeleteAfter')
-                && $this->registerHook('displayAdminNavBarBeforeEnd');
-        } catch (\Throwable $e) {
-            PrestaShopLogger::addLog('[CacheBoost] Erreur install(): ' . $e->getMessage());
-            return false;
         }
 
+        // Créer le fichier .htaccess pour sécuriser le répertoire cache
+        $htaccessContent = "Order deny,allow\nDeny from all\n";
+        file_put_contents($cacheDir . '.htaccess', $htaccessContent);
+
+        return true;
+    }
+
+    private function installConfiguration()
+    {
+        $configs = [
+            'CACHEBOOST_ENABLED' => true,
+            'CACHEBOOST_ENABLE_DEV_MODE' => false,
+            'CACHEBOOST_COMPRESSION_ENABLED' => true,
+            'CACHEBOOST_CACHE_AJAX' => false,
+            'CACHEBOOST_BOT_CACHE_ENABLED' => true,
+            'CACHEBOOST_BOT_USER_AGENTS' => 'Lighthouse,Googlebot,Bingbot,Slurp,DuckDuckBot,Baiduspider,YandexBot,AhrefsBot,SemrushBot,DotBot,Exabot,MJ12bot,Screaming Frog SEO Spider,Wget,curl',
+            'CACHEBOOST_ASSET_CACHE_ENABLED' => false,
+            'CACHEBOOST_ASSET_EXTENSIONS' => 'js,css,png,jpg,jpeg,gif,webp,svg',
+            'CACHEBOOST_ASSET_DURATION' => 86400,
+            'CACHEBOOST_CACHE_HOMEPAGE' => true,
+            'CACHEBOOST_CACHE_CATEGORY' => true,
+            'CACHEBOOST_CACHE_PRODUCT' => true,
+            'CACHEBOOST_CACHE_CMS' => true,
+            'CACHEBOOST_AUTO_WARMUP' => true,
+            'CACHEBOOST_PURGE_AGE' => 0,
+            'CACHEBOOST_PURGE_SIZE' => 0,
+            'CACHEBOOST_DURATION' => 3600,
+            'CACHEBOOST_EXCLUDE' => '',
+            'CACHEBOOST_ENGINE' => 'filesystem',
+            'CACHEBOOST_REDIS_IP' => '127.0.0.1',
+            'CACHEBOOST_REDIS_PORT' => 6379,
+            'CACHEBOOST_MEMCACHED_IP' => '127.0.0.1',
+            'CACHEBOOST_MEMCACHED_PORT' => 11211,
+            'CACHEBOOST_HITS' => 0,
+            'CACHEBOOST_MISSES' => 0,
+            'CACHEBOOST_LAST_FLUSH' => '',
+            'CACHEBOOST_WARMING_QUEUE' => '[]'
+        ];
+
+        foreach ($configs as $key => $value) {
+            if (!ConfigurationService::update($key, $value)) {
+                $this->_errors[] = $this->l('Failed to save configuration: ') . $key;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function installHooks()
+    {
+        $hooks = [
+            // 'actionDispatcherBefore',
+            'actionFrontControllerBefore',
+            'actionProductUpdate',
+            'actionObjectProductDeleteAfter',
+            'actionObjectCategoryUpdateAfter',
+            'actionObjectCategoryDeleteAfter',
+            'actionAdminCmsPageUpdateAfter',
+            'actionObjectCmsDeleteAfter',
+            'displayAdminNavBarBeforeEnd'
+        ];
+
+        foreach ($hooks as $hook) {
+            if (!$this->registerHook($hook)) {
+                $this->_errors[] = $this->l('Failed to register hook: ') . $hook;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function installTabs()
+    {
+        // Installation des onglets avec gestion d'erreur
         $parentTabId = (int) Tab::getIdFromClassName('IMPROVE');
         if (!$parentTabId) {
             $parentTabId = (int) Tab::getIdFromClassName('AdminParentModulesSf');
         }
 
+        if (!$parentTabId) {
+            $this->_errors[] = $this->l('Could not find parent tab for module.');
+            return false;
+        }
+
+        // Suppression des onglets existants (en cas de réinstallation)
+        $this->uninstallTabs();
+
+        // Création de l'onglet principal
         $mainTab = new Tab();
         $mainTab->class_name = 'AdminMacymedCacheBoost';
         $mainTab->id_parent = $parentTabId;
         $mainTab->module = $this->name;
         $mainTab->active = 1;
+        $mainTab->icon = 'cached';
+
         foreach (Language::getLanguages(true) as $lang) {
             $mainTab->name[$lang['id_lang']] = 'Macymed CacheBoost';
         }
 
-        $tab_success = $mainTab->save();
+        if (!$mainTab->save()) {
+            $this->_errors[] = $this->l('Failed to create main tab.');
+            return false;
+        }
 
+        // Création des sous-onglets
         foreach ($this->getTabs() as $tabData) {
             if ($tabData['class_name'] === 'AdminMacymedCacheBoost') {
                 continue;
             }
+
             $tab = new Tab();
             $tab->class_name = $tabData['class_name'];
             $tab->id_parent = (int) Tab::getIdFromClassName('AdminMacymedCacheBoost');
             $tab->module = $this->name;
             $tab->active = 1;
+
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $tabData['name'];
             }
-            $tab_success = $tab_success && $tab->save();
+
+            if (!$tab->save()) {
+                $this->_errors[] = $this->l('Failed to create tab: ') . $tabData['name'];
+                return false;
+            }
         }
 
-        Tools::clearAllCache();
-
-        return parent::install() && $config_success && $hook_success && $tab_success;
+        return true;
     }
 
-    public function uninstall()
+    private function uninstallTabs()
     {
-        foreach ([
-            'CACHEBOOST_DURATION',
-            'CACHEBOOST_EXCLUDE',
-            'CACHEBOOST_ENGINE',
-            'CACHEBOOST_REDIS_IP',
-            'CACHEBOOST_REDIS_PORT',
-            'CACHEBOOST_MEMCACHED_IP',
-            'CACHEBOOST_MEMCACHED_PORT',
-            'CACHEBOOST_ENABLED',
-            'CACHEBOOST_ENABLE_DEV_MODE',
-            'CACHEBOOST_COMPRESSION_ENABLED',
-            'CACHEBOOST_CACHE_AJAX',
-            'CACHEBOOST_BOT_CACHE_ENABLED',
-            'CACHEBOOST_BOT_USER_AGENTS',
-            'CACHEBOOST_ASSET_CACHE_ENABLED',
-            'CACHEBOOST_ASSET_EXTENSIONS',
-            'CACHEBOOST_ASSET_DURATION',
-            'CACHEBOOST_CACHE_HOMEPAGE',
-            'CACHEBOOST_CACHE_CATEGORY',
-            'CACHEBOOST_CACHE_PRODUCT',
-            'CACHEBOOST_CACHE_CMS',
-            'CACHEBOOST_AUTO_WARMUP',
-            'CACHEBOOST_PURGE_AGE',
-            'CACHEBOOST_PURGE_SIZE'
-        ] as $key) {
-            ConfigurationService::delete($key);
-        }
-
-        CacheManager::uninstallCache();
-
         $tabClasses = array_merge(
             ['AdminMacymedCacheBoost'],
             array_column($this->getTabs(), 'class_name')
@@ -152,36 +233,99 @@ class MacymedCacheBoost extends Module
                 $tab->delete();
             }
         }
-
-        Tools::clearAllCache();
-
-        return parent::uninstall();
     }
 
-    public function getTabs()
+    // Amélioration de la méthode uninstall() également
+    public function uninstall()
     {
-        return [
-            ['name' => 'Macymed CacheBoost', 'class_name' => 'AdminMacymedCacheBoost'],
-            ['name' => 'Dashboard', 'class_name' => 'AdminMacymedCacheBoostDashboard'],
-            ['name' => 'General Settings', 'class_name' => 'AdminMacymedCacheBoostGeneral'],
-            ['name' => 'Bot Settings', 'class_name' => 'AdminMacymedCacheBoostBots'],
-            ['name' => 'Asset Cache', 'class_name' => 'AdminMacymedCacheBoostAssets'],
-            ['name' => 'Page Type Cache', 'class_name' => 'AdminMacymedCacheBoostPageTypes'],
-            ['name' => 'Redis Settings', 'class_name' => 'AdminMacymedCacheBoostRedis'],
-            ['name' => 'Memcached Settings', 'class_name' => 'AdminMacymedCacheBoostMemcached'],
-            ['name' => 'Granular Invalidation', 'class_name' => 'AdminMacymedCacheBoostInvalidation'],
-            ['name' => 'Cache Warmer', 'class_name' => 'AdminMacymedCacheBoostWarmer'],
-        ];
-    }
+        try {
+            // Suppression de toutes les configurations
+            foreach ([
+                'CACHEBOOST_DURATION',
+                'CACHEBOOST_EXCLUDE',
+                'CACHEBOOST_ENGINE',
+                'CACHEBOOST_REDIS_IP',
+                'CACHEBOOST_REDIS_PORT',
+                'CACHEBOOST_MEMCACHED_IP',
+                'CACHEBOOST_MEMCACHED_PORT',
+                'CACHEBOOST_ENABLED',
+                'CACHEBOOST_ENABLE_DEV_MODE',
+                'CACHEBOOST_COMPRESSION_ENABLED',
+                'CACHEBOOST_CACHE_AJAX',
+                'CACHEBOOST_BOT_CACHE_ENABLED',
+                'CACHEBOOST_BOT_USER_AGENTS',
+                'CACHEBOOST_ASSET_CACHE_ENABLED',
+                'CACHEBOOST_ASSET_EXTENSIONS',
+                'CACHEBOOST_ASSET_DURATION',
+                'CACHEBOOST_CACHE_HOMEPAGE',
+                'CACHEBOOST_CACHE_CATEGORY',
+                'CACHEBOOST_CACHE_PRODUCT',
+                'CACHEBOOST_CACHE_CMS',
+                'CACHEBOOST_AUTO_WARMUP',
+                'CACHEBOOST_PURGE_AGE',
+                'CACHEBOOST_PURGE_SIZE',
+                'CACHEBOOST_HITS',
+                'CACHEBOOST_MISSES',
+                'CACHEBOOST_LAST_FLUSH',
+                'CACHEBOOST_WARMING_QUEUE'
+            ] as $key) {
+                ConfigurationService::delete($key);
+            }
 
-    public function getContent()
-    {
-        if (method_exists($this, 'get')) {
-            Tools::redirectAdmin($this->get('router')->generate('macymedcacheboost_dashboard'));
+            // Nettoyage du cache
+            CacheManager::uninstallCache();
+
+            // Suppression des onglets
+            $this->uninstallTabs();
+
+            // Nettoyage général
+            Tools::clearAllCache();
+
+            return parent::uninstall();
+
+        } catch (\Exception $e) {
+            PrestaShopLogger::addLog('[CacheBoost] Uninstallation error: ' . $e->getMessage(), 3);
+            $this->_errors[] = $this->l('Uninstallation failed: ') . $e->getMessage();
+            return false;
         }
     }
 
-    public function hookActionDispatcherBefore($params)
+    // Amélioration de la méthode getContent() pour éviter les erreurs Symfony
+    public function getContent()
+    {
+        // Vérifier si nous sommes en mode Symfony
+        if (class_exists('Symfony\Component\Routing\Router')) {
+            try {
+                // Tentative de redirection Symfony
+                if (method_exists($this, 'get')) {
+                    $router = $this->get('router');
+                    if ($router) {
+                        $url = $router->generate('macymedcacheboost_dashboard');
+                        Tools::redirectAdmin($url);
+                        return;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Log l'erreur mais continue avec le fallback
+                PrestaShopLogger::addLog('[CacheBoost] Symfony routing error: ' . $e->getMessage(), 2);
+            }
+        }
+
+        // Fallback: redirection vers le contrôleur admin classique
+        try {
+            $admin_link = Context::getContext()->link->getAdminLink('AdminMacymedCacheBoostDashboard');
+            Tools::redirectAdmin($admin_link);
+        } catch (\Exception $e) {
+            // Si même le fallback échoue, afficher un message d'erreur
+            $this->context->smarty->assign([
+                'module_name' => $this->displayName,
+                'error_message' => $this->l('Unable to access module configuration. Please check your installation.')
+            ]);
+            return $this->display(__FILE__, 'views/templates/admin/error.tpl');
+        }
+    }
+
+    public function hookActionFrontControllerBefore($params)
     {
         CacheManager::checkAndServeCache();
     }

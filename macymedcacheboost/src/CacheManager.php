@@ -13,7 +13,8 @@ use Product;
 use Dispatcher;
 use MacymedCacheBoost\Services\ConfigurationService;
 use PrestaShopLogger;
-
+use Customer;
+use Employee;
 class CacheManager
 {
     private static $core_excluded_controllers = [
@@ -223,8 +224,9 @@ class CacheManager
                 return true;
             }
         } else { // If it's a bot, force guest context
-            $context->customer = new \Customer(); // Create a new empty customer object
-            $context->employee = null; // Ensure no employee is logged in
+            $context->customer = new Customer(); // Create a new empty customer object
+            $context->employee = new Employee(); // Ensure no employee is logged in
+            $context->employee->id = null;
         }
 
         return false;

@@ -1,44 +1,45 @@
+# config/routes.yml
 macymedcacheboost_dashboard:
-    path: /macymedcacheboost/dashboard
-    controller: macymedcacheboost.controller.admin.dashboard
+    path: /modules/macymedcacheboost/dashboard
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostDashboardController::index'
     methods: [GET]
 
 macymedcacheboost_general:
-    path: /macymedcacheboost/general
-    controller: macymedcacheboost.controller.admin.general
+    path: /modules/macymedcacheboost/general
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostGeneralController::index'
     methods: [GET, POST]
 
 macymedcacheboost_bots:
-    path: /macymedcacheboost/bots
-    controller: macymedcacheboost.controller.admin.bots
+    path: /modules/macymedcacheboost/bots
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostBotsController::index'
     methods: [GET, POST]
 
-macymedcacheboost_assets:
-    path: /macymedcacheboost/assets
-    controller: macymedcacheboost.controller.admin.assets
+macymedcacheboost_assets: 
+    path: /modules/macymedcacheboost/assets
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostAssetsController::index'
     methods: [GET, POST]
 
 macymedcacheboost_pagetypes:
-    path: /macymedcacheboost/pagetypes
-    controller: macymedcacheboost.controller.admin.pagetypes
+    path: /modules/macymedcacheboost/pagetypes
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostPageTypesController::index'
     methods: [GET, POST]
 
 macymedcacheboost_redis:
-    path: /macymedcacheboost/redis
-    controller: macymedcacheboost.controller.admin.redis
+    path: /modules/macymedcacheboost/redis
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostRedisController::index'
     methods: [GET, POST]
 
 macymedcacheboost_memcached:
-    path: /macymedcacheboost/memcached
-    controller: macymedcacheboost.controller.admin.memcached
+    path: /modules/macymedcacheboost/memcached
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostMemcachedController::index'
     methods: [GET, POST]
 
 macymedcacheboost_invalidation:
-    path: /macymedcacheboost/invalidation
-    controller: macymedcacheboost.controller.admin.invalidation
+    path: /modules/macymedcacheboost/invalidation
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostInvalidationController::index'
     methods: [GET, POST]
 
 macymedcacheboost_warmer:
-    path: /macymedcacheboost/warmer
-    controller: macymedcacheboost.controller.admin.warmer
+    path: /modules/macymedcacheboost/warmer
+    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostWarmerController::index'
     methods: [GET, POST]
