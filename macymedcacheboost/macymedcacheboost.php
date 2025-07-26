@@ -74,7 +74,7 @@ class MacymedCacheBoost extends Module
         return false;
     }
 
-        $parentTabId = (int) Tab::getIdFromClassName('AdminParentImprove');
+        $parentTabId = (int) Tab::getIdFromClassName('IMPROVE');
         if (!$parentTabId) {
             $parentTabId = (int) Tab::getIdFromClassName('AdminParentModulesSf');
         }
