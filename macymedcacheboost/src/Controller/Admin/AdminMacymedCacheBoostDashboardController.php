@@ -11,7 +11,6 @@ use MacymedCacheBoost\Services\ConfigurationService;
 use PrestaShopLogger;
 use Redis;
 use Context;
-use Dispatcher;
 
 class AdminMacymedCacheBoostDashboardController extends ModuleAdminController
 {
