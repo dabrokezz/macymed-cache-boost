@@ -142,14 +142,12 @@ class MacymedCacheBoost extends Module
     {
         $hooks = [
             // 'actionDispatcherBefore',
-            'actionFrontControllerBefore',
+            'actionFrontControllerInitBefore',
             'actionProductUpdate',
-            'actionObjectProductDeleteAfter',
-            'actionObjectCategoryUpdateAfter',
-            'actionObjectCategoryDeleteAfter',
-            'actionAdminCmsPageUpdateAfter',
-            'actionObjectCmsDeleteAfter',
-            'displayAdminNavBarBeforeEnd'
+            'actionProductDelete',
+            'actionCategoryUpdate',
+            'actionCategoryDelete',
+            'actionAfterUpdateCmsPageFormHandler'
         ];
 
         foreach ($hooks as $hook) {
@@ -325,7 +323,7 @@ class MacymedCacheBoost extends Module
         }
     }
 
-    public function hookActionFrontControllerBefore($params)
+    public function hookActionFrontControllerInitBefore($params)
     {
         CacheManager::checkAndServeCache();
     }
@@ -337,50 +335,34 @@ class MacymedCacheBoost extends Module
         }
     }
 
-    public function hookActionObjectProductDeleteAfter($params)
+    public function hookActionProductDelete($params)
     {
         if (isset($params['object'])) {
             CacheService::invalidateProductCache($params['object']->id);
         }
     }
 
-    public function hookActionObjectCategoryUpdateAfter($params)
+    public function hookActionCategoryUpdate($params)
     {
         if (isset($params['object'])) {
             CacheService::invalidateCategoryCache($params['object']->id);
         }
     }
 
-    public function hookActionObjectCategoryDeleteAfter($params)
+    public function hookActionCategoryDelete($params)
     {
         if (isset($params['object'])) {
             CacheService::invalidateCategoryCache($params['object']->id);
         }
     }
 
-    public function hookActionAdminCmsPageUpdateAfter($params)
+    public function hookActionAfterUpdateCmsPageFormHandler($params)
     {
         if (isset($params['object'])) {
             CacheService::invalidateCmsCache($params['object']->id);
         }
     }
 
-    public function hookActionObjectCmsDeleteAfter($params)
-    {
-        if (isset($params['object'])) {
-            CacheService::invalidateCmsCache($params['object']->id);
-        }
-    }
+    /* Hook removed in PrestaShop 8.1: actionObjectCmsDeleteAfter */
 
-    public function hookDisplayAdminNavBarBeforeEnd($params)
-    {
-        $context = Context::getContext();
-        if ($context && $context->employee && $context->employee->isLoggedBack() && Configuration::get('PS_TOOLBAR_ACTIVE')) {
-            $this->context->smarty->assign([
-                'admin_link' => $this->context->link->getAdminLink('AdminMacymedCacheBoostDashboard'),
-                'token' => Tools::getAdminTokenLite('AdminMacymedCacheBoostDashboard'),
-            ]);
-            return $this->display(__FILE__, 'views/templates/hook/flush_button.tpl');
-        }
-    }
 }
