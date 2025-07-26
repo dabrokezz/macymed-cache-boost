@@ -9,6 +9,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use MacymedCacheBoost\CacheManager;
 use MacymedCacheBoost\Services\CacheService;
 use MacymedCacheBoost\Services\ConfigurationService;
+use Db;
 
 class MacymedCacheBoost extends Module
 {
@@ -37,6 +38,8 @@ class MacymedCacheBoost extends Module
                 $this->_errors[] = $this->l('This module requires PrestaShop 8.1.0 or higher.');
                 return false;
             }
+
+            $this->unregisterModuleHooks();
 
             // Création du répertoire cache
             $cacheDir = _PS_MODULE_DIR_ . $this->name . '/cache/';
@@ -233,10 +236,27 @@ class MacymedCacheBoost extends Module
         }
     }
 
+    private function unregisterModuleHooks()
+    {
+        $rows = Db::getInstance()->executeS(
+            'SELECT h.name
+             FROM ' . _DB_PREFIX_ . 'hook h
+             INNER JOIN ' . _DB_PREFIX_ . 'hook_module hm
+                 ON h.id_hook = hm.id_hook
+             WHERE hm.id_module = ' . (int) $this->id
+        );
+
+        foreach ($rows as $row) {
+            $this->unregisterHook($row['name']);
+        }
+    }
+
     // Amélioration de la méthode uninstall() également
     public function uninstall()
     {
         try {
+            $this->unregisterModuleHooks();
+
             // Suppression de toutes les configurations
             foreach ([
                 'CACHEBOOST_DURATION',
