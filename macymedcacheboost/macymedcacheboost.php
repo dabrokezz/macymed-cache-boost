@@ -141,7 +141,7 @@ class MacymedCacheBoost extends Module
     private function installHooks()
     {
         $hooks = [
-            // 'actionDispatcherBefore',
+            'actionDispatcherBefore',
             'actionFrontControllerInitBefore',
             'actionProductUpdate',
             'actionProductDelete',
@@ -323,7 +323,14 @@ class MacymedCacheBoost extends Module
         }
     }
 
+    public function hookActionDispatcherBefore($params)
+    {
+        CacheManager::checkAndServeCache();
+    }
+
+    
     public function hookActionFrontControllerInitBefore($params)
+
     {
         CacheManager::checkAndServeCache();
     }
