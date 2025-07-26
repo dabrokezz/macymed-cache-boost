@@ -34,43 +34,43 @@ class MacymedCacheBoost extends Module
         $hook_success = false;
         $config_success = false;
         try {
-        $cacheDir = _PS_MODULE_DIR_ . $this->name . '/cache/';
-        if (!is_dir($cacheDir)) {
-            if (!mkdir($cacheDir, 0755, true) && !is_dir($cacheDir)) {
-                $this->_errors[] = $this->l('Could not create cache directory: ') . $cacheDir;
-                return false;
+            $cacheDir = _PS_MODULE_DIR_ . $this->name . '/cache/';
+            if (!is_dir($cacheDir)) {
+                if (!mkdir($cacheDir, 0755, true) && !is_dir($cacheDir)) {
+                    $this->_errors[] = $this->l('Could not create cache directory: ') . $cacheDir;
+                    return false;
+                }
             }
+
+            $config_success = ConfigurationService::update('CACHEBOOST_ENABLED', true)
+                && ConfigurationService::update('CACHEBOOST_ENABLE_DEV_MODE', false)
+                && ConfigurationService::update('CACHEBOOST_COMPRESSION_ENABLED', true)
+                && ConfigurationService::update('CACHEBOOST_CACHE_AJAX', false)
+                && ConfigurationService::update('CACHEBOOST_BOT_CACHE_ENABLED', true)
+                && ConfigurationService::update('CACHEBOOST_BOT_USER_AGENTS', 'Lighthouse,Googlebot,Bingbot,Slurp,DuckDuckBot,Baiduspider,YandexBot,AhrefsBot,SemrushBot,DotBot,Exabot,MJ12bot,Screaming Frog SEO Spider,Wget,curl')
+                && ConfigurationService::update('CACHEBOOST_ASSET_CACHE_ENABLED', false)
+                && ConfigurationService::update('CACHEBOOST_ASSET_EXTENSIONS', 'js,css,png,jpg,jpeg,gif,webp,svg')
+                && ConfigurationService::update('CACHEBOOST_ASSET_DURATION', 86400)
+                && ConfigurationService::update('CACHEBOOST_CACHE_HOMEPAGE', true)
+                && ConfigurationService::update('CACHEBOOST_CACHE_CATEGORY', true)
+                && ConfigurationService::update('CACHEBOOST_CACHE_PRODUCT', true)
+                && ConfigurationService::update('CACHEBOOST_CACHE_CMS', true)
+                && ConfigurationService::update('CACHEBOOST_AUTO_WARMUP', true)
+                && ConfigurationService::update('CACHEBOOST_PURGE_AGE', 0)
+                && ConfigurationService::update('CACHEBOOST_PURGE_SIZE', 0);
+
+            $hook_success = $this->registerHook('actionDispatcherBefore')
+                && $this->registerHook('actionProductUpdate')
+                && $this->registerHook('actionObjectProductDeleteAfter')
+                && $this->registerHook('actionObjectCategoryUpdateAfter')
+                && $this->registerHook('actionObjectCategoryDeleteAfter')
+                && $this->registerHook('actionAdminCmsPageUpdateAfter')
+                && $this->registerHook('actionObjectCmsDeleteAfter')
+                && $this->registerHook('displayAdminNavBarBeforeEnd');
+        } catch (\Throwable $e) {
+            PrestaShopLogger::addLog('[CacheBoost] Erreur install(): ' . $e->getMessage());
+            return false;
         }
-
-        $config_success = ConfigurationService::update('CACHEBOOST_ENABLED', true)
-            && ConfigurationService::update('CACHEBOOST_ENABLE_DEV_MODE', false)
-            && ConfigurationService::update('CACHEBOOST_COMPRESSION_ENABLED', true)
-            && ConfigurationService::update('CACHEBOOST_CACHE_AJAX', false)
-            && ConfigurationService::update('CACHEBOOST_BOT_CACHE_ENABLED', true)
-            && ConfigurationService::update('CACHEBOOST_BOT_USER_AGENTS', 'Lighthouse,Googlebot,Bingbot,Slurp,DuckDuckBot,Baiduspider,YandexBot,AhrefsBot,SemrushBot,DotBot,Exabot,MJ12bot,Screaming Frog SEO Spider,Wget,curl')
-            && ConfigurationService::update('CACHEBOOST_ASSET_CACHE_ENABLED', false)
-            && ConfigurationService::update('CACHEBOOST_ASSET_EXTENSIONS', 'js,css,png,jpg,jpeg,gif,webp,svg')
-            && ConfigurationService::update('CACHEBOOST_ASSET_DURATION', 86400)
-            && ConfigurationService::update('CACHEBOOST_CACHE_HOMEPAGE', true)
-            && ConfigurationService::update('CACHEBOOST_CACHE_CATEGORY', true)
-            && ConfigurationService::update('CACHEBOOST_CACHE_PRODUCT', true)
-            && ConfigurationService::update('CACHEBOOST_CACHE_CMS', true)
-            && ConfigurationService::update('CACHEBOOST_AUTO_WARMUP', true)
-            && ConfigurationService::update('CACHEBOOST_PURGE_AGE', 0)
-            && ConfigurationService::update('CACHEBOOST_PURGE_SIZE', 0);
-
-        $hook_success = $this->registerHook('actionDispatcherBefore')
-            && $this->registerHook('actionProductUpdate')
-            && $this->registerHook('actionObjectProductDeleteAfter')
-            && $this->registerHook('actionObjectCategoryUpdateAfter')
-            && $this->registerHook('actionObjectCategoryDeleteAfter')
-            && $this->registerHook('actionAdminCmsPageUpdateAfter')
-            && $this->registerHook('actionObjectCmsDeleteAfter')
-            && $this->registerHook('displayAdminNavBarBeforeEnd');
-             } catch (\Throwable $e) {
-        PrestaShopLogger::addLog('[CacheBoost] Erreur install(): ' . $e->getMessage());
-        return false;
-    }
 
         $parentTabId = (int) Tab::getIdFromClassName('IMPROVE');
         if (!$parentTabId) {
@@ -111,12 +111,29 @@ class MacymedCacheBoost extends Module
     public function uninstall()
     {
         foreach ([
-            'CACHEBOOST_DURATION', 'CACHEBOOST_EXCLUDE', 'CACHEBOOST_ENGINE', 'CACHEBOOST_REDIS_IP', 'CACHEBOOST_REDIS_PORT',
-            'CACHEBOOST_MEMCACHED_IP', 'CACHEBOOST_MEMCACHED_PORT', 'CACHEBOOST_ENABLED', 'CACHEBOOST_ENABLE_DEV_MODE',
-            'CACHEBOOST_COMPRESSION_ENABLED', 'CACHEBOOST_CACHE_AJAX', 'CACHEBOOST_BOT_CACHE_ENABLED', 'CACHEBOOST_BOT_USER_AGENTS',
-            'CACHEBOOST_ASSET_CACHE_ENABLED', 'CACHEBOOST_ASSET_EXTENSIONS', 'CACHEBOOST_ASSET_DURATION',
-            'CACHEBOOST_CACHE_HOMEPAGE', 'CACHEBOOST_CACHE_CATEGORY', 'CACHEBOOST_CACHE_PRODUCT',
-            'CACHEBOOST_CACHE_CMS', 'CACHEBOOST_AUTO_WARMUP', 'CACHEBOOST_PURGE_AGE', 'CACHEBOOST_PURGE_SIZE'
+            'CACHEBOOST_DURATION',
+            'CACHEBOOST_EXCLUDE',
+            'CACHEBOOST_ENGINE',
+            'CACHEBOOST_REDIS_IP',
+            'CACHEBOOST_REDIS_PORT',
+            'CACHEBOOST_MEMCACHED_IP',
+            'CACHEBOOST_MEMCACHED_PORT',
+            'CACHEBOOST_ENABLED',
+            'CACHEBOOST_ENABLE_DEV_MODE',
+            'CACHEBOOST_COMPRESSION_ENABLED',
+            'CACHEBOOST_CACHE_AJAX',
+            'CACHEBOOST_BOT_CACHE_ENABLED',
+            'CACHEBOOST_BOT_USER_AGENTS',
+            'CACHEBOOST_ASSET_CACHE_ENABLED',
+            'CACHEBOOST_ASSET_EXTENSIONS',
+            'CACHEBOOST_ASSET_DURATION',
+            'CACHEBOOST_CACHE_HOMEPAGE',
+            'CACHEBOOST_CACHE_CATEGORY',
+            'CACHEBOOST_CACHE_PRODUCT',
+            'CACHEBOOST_CACHE_CMS',
+            'CACHEBOOST_AUTO_WARMUP',
+            'CACHEBOOST_PURGE_AGE',
+            'CACHEBOOST_PURGE_SIZE'
         ] as $key) {
             ConfigurationService::delete($key);
         }
