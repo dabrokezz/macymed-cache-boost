@@ -9,6 +9,13 @@ use MacymedCacheBoost\CacheManager;
 
 class CacheBoostRequestListener implements EventSubscriberInterface
 {
+    private $cacheManager;
+
+    public function __construct(CacheManager $cacheManager)
+    {
+        $this->cacheManager = $cacheManager;
+    }
+
     public static function getSubscribedEvents()
     {
         return [
@@ -23,6 +30,6 @@ class CacheBoostRequestListener implements EventSubscriberInterface
         }
 
         // Appeler la logique de cache
-        CacheManager::checkAndServeCache();
+        $this->cacheManager->checkAndServeCache();
     }
 }

@@ -7,25 +7,29 @@ if (!defined('_PS_VERSION_')) {
 }
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
-use MacymedCacheBoost\Services\AdminAjaxHandlerService;
+use MacymedCacheBoost\Form\WarmerType;
 use MacymedCacheBoost\Services\ConfigurationService;
 use MacymedCacheBoost\Services\WarmingQueueService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tools;
 
 class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminController
 {
-    public function indexAction(): Response
+    public function indexAction(Request $request): Response
     {
-        // Gérer le postProcess si le formulaire est soumis
-        if (\Tools::isSubmit('submit_cacheboost_warmer_config')) {
-            ConfigurationService::update('CACHEBOOST_AUTO_WARMUP', (bool) Tools::getValue('CACHEBOOST_AUTO_WARMUP'));
+        $form = $this->createForm(WarmerType::class, $this->get('macymedcacheboost.configuration.service')->getAllConfigValues());
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $this->get('macymedcacheboost.configuration.service')->updateBulk($data);
             $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
         }
 
-        $this->assignVariablesToSmartyTpl();
-
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostwarmer.html.twig', [
+            'form' => $form->createView(),
             'warming_queue_count' => WarmingQueueService::getQueueCount(),
         ]);
     }
@@ -40,10 +44,5 @@ class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminControl
             die(json_encode($result));
         }
         AdminAjaxHandlerService::handleAjaxRequest($action, $this->context);
-    }
-
-    private function assignVariablesToSmartyTpl()
-    {
-        $this->context->smarty->assign(ConfigurationService::getAllConfigValues());
     }
 }

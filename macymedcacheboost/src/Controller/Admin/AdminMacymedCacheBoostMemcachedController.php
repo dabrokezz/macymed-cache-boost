@@ -7,28 +7,27 @@ if (!defined('_PS_VERSION_')) {
 }
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
-use MacymedCacheBoost\Services\AdminConfigurationHandlerService;
+use MacymedCacheBoost\Form\MemcachedType;
 use MacymedCacheBoost\Services\ConfigurationService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMacymedCacheBoostMemcachedController extends FrameworkBundleAdminController
 {
-    public function indexAction(): Response
+    public function indexAction(Request $request): Response
     {
-        // Gérer le postProcess si le formulaire est soumis
-        if (\Tools::isSubmit('submit_cacheboost_config')) {
-            AdminConfigurationHandlerService::handleForm($this->token, $this);
+        $form = $this->createForm(MemcachedType::class, $this->get('macymedcacheboost.configuration.service')->getAllConfigValues());
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $this->get('macymedcacheboost.configuration.service')->updateBulk($data);
+            $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
         }
 
-        $this->assignVariablesToSmartyTpl();
-
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostmemcached.html.twig', [
-            // Passez ici les variables nécessaires à votre template Twig
+            'form' => $form->createView(),
         ]);
-    }
-
-    private function assignVariablesToSmartyTpl()
-    {
-        $this->context->smarty->assign(ConfigurationService::getAllConfigValues());
     }
 }

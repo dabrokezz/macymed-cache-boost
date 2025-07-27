@@ -17,18 +17,9 @@ class AdminMacymedCacheBoostDashboardController extends FrameworkBundleAdminCont
 {
     public function indexAction(): Response
     {
-        $this->assignVariablesToSmartyTpl();
-
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostdashboard.html.twig', [
             'cache_stats' => $this->getCacheStatistics(),
         ]);
-    }
-
-    private function assignVariablesToSmartyTpl()
-    {
-        // Cette méthode est conservée pour la compatibilité si des templates Smarty sont encore utilisés
-        // ou si des variables doivent être assignées au contexte Smarty global.
-        // $this->context->smarty->assign('cache_stats', $this->getCacheStatistics());
     }
 
     private function getCacheStatistics()

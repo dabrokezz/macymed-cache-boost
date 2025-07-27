@@ -53,9 +53,9 @@ class MacymedCacheBoost extends Module
             }
 
             // Enregistrement des hooks
-            // if (!$this->installHooks()) {
-            //     return false;
-            // }
+            if (!$this->installHooks()) {
+                return false;
+            }
 
             // Installation des onglets
             if (!$this->installTabs()) {
@@ -102,38 +102,39 @@ class MacymedCacheBoost extends Module
 
     private function installConfiguration()
     {
+        $configurationService = $this->get('macymedcacheboost.configuration.service');
         $configs = [
-            'CACHEBOOST_ENABLED' => true,
-            'CACHEBOOST_ENABLE_DEV_MODE' => false,
-            'CACHEBOOST_COMPRESSION_ENABLED' => true,
-            'CACHEBOOST_CACHE_AJAX' => false,
-            'CACHEBOOST_BOT_CACHE_ENABLED' => true,
-            'CACHEBOOST_BOT_USER_AGENTS' => 'Lighthouse,Googlebot,Bingbot,Slurp,DuckDuckBot,Baiduspider,YandexBot,AhrefsBot,SemrushBot,DotBot,Exabot,MJ12bot,Screaming Frog SEO Spider,Wget,curl',
-            'CACHEBOOST_ASSET_CACHE_ENABLED' => false,
-            'CACHEBOOST_ASSET_EXTENSIONS' => 'js,css,png,jpg,jpeg,gif,webp,svg',
-            'CACHEBOOST_ASSET_DURATION' => 86400,
-            'CACHEBOOST_CACHE_HOMEPAGE' => true,
-            'CACHEBOOST_CACHE_CATEGORY' => true,
-            'CACHEBOOST_CACHE_PRODUCT' => true,
-            'CACHEBOOST_CACHE_CMS' => true,
-            'CACHEBOOST_AUTO_WARMUP' => true,
-            'CACHEBOOST_PURGE_AGE' => 0,
-            'CACHEBOOST_PURGE_SIZE' => 0,
-            'CACHEBOOST_DURATION' => 3600,
-            'CACHEBOOST_EXCLUDE' => '',
-            'CACHEBOOST_ENGINE' => 'filesystem',
-            'CACHEBOOST_REDIS_IP' => '127.0.0.1',
-            'CACHEBOOST_REDIS_PORT' => 6379,
-            'CACHEBOOST_MEMCACHED_IP' => '127.0.0.1',
-            'CACHEBOOST_MEMCACHED_PORT' => 11211,
-            'CACHEBOOST_HITS' => 0,
-            'CACHEBOOST_MISSES' => 0,
-            'CACHEBOOST_LAST_FLUSH' => '',
-            'CACHEBOOST_WARMING_QUEUE' => '[]'
+            'ENABLED' => true,
+            'ENABLE_DEV_MODE' => false,
+            'COMPRESSION_ENABLED' => true,
+            'CACHE_AJAX' => false,
+            'BOT_CACHE_ENABLED' => true,
+            'BOT_USER_AGENTS' => 'Lighthouse,Googlebot,Bingbot,Slurp,DuckDuckBot,Baiduspider,YandexBot,AhrefsBot,SemrushBot,DotBot,Exabot,MJ12bot,Screaming Frog SEO Spider,Wget,curl',
+            'ASSET_CACHE_ENABLED' => false,
+            'ASSET_EXTENSIONS' => 'js,css,png,jpg,jpeg,gif,webp,svg',
+            'ASSET_DURATION' => 86400,
+            'CACHE_HOMEPAGE' => true,
+            'CACHE_CATEGORY' => true,
+            'CACHE_PRODUCT' => true,
+            'CACHE_CMS' => true,
+            'AUTO_WARMUP' => true,
+            'PURGE_AGE' => 0,
+            'PURGE_SIZE' => 0,
+            'DURATION' => 3600,
+            'EXCLUDE' => '',
+            'ENGINE' => 'filesystem',
+            'REDIS_IP' => '127.0.0.1',
+            'REDIS_PORT' => 6379,
+            'MEMCACHED_IP' => '127.0.0.1',
+            'MEMCACHED_PORT' => 11211,
+            'HITS' => 0,
+            'MISSES' => 0,
+            'LAST_FLUSH' => '',
+            'WARMING_QUEUE' => '[]'
         ];
 
         foreach ($configs as $key => $value) {
-            if (!ConfigurationService::update($key, $value)) {
+            if (!$configurationService->update($key, $value)) {
                 $this->_errors[] = $this->l('Failed to save configuration: ') . $key;
                 return false;
             }
@@ -144,6 +145,8 @@ class MacymedCacheBoost extends Module
     private function installHooks()
     {
         $hooks = [
+            'actionDispatcherBefore',
+            'actionFrontControllerInitBefore',
             'actionProductUpdate',
             'actionProductDelete',
             'actionCategoryUpdate',
@@ -300,42 +303,43 @@ class MacymedCacheBoost extends Module
     {
         try {
             $this->unregisterModuleHooks();
+            $configurationService = $this->get('macymedcacheboost.configuration.service');
 
             // Suppression de toutes les configurations
             foreach ([
-                'CACHEBOOST_DURATION',
-                'CACHEBOOST_EXCLUDE',
-                'CACHEBOOST_ENGINE',
-                'CACHEBOOST_REDIS_IP',
-                'CACHEBOOST_REDIS_PORT',
-                'CACHEBOOST_MEMCACHED_IP',
-                'CACHEBOOST_MEMCACHED_PORT',
-                'CACHEBOOST_ENABLED',
-                'CACHEBOOST_ENABLE_DEV_MODE',
-                'CACHEBOOST_COMPRESSION_ENABLED',
-                'CACHEBOOST_CACHE_AJAX',
-                'CACHEBOOST_BOT_CACHE_ENABLED',
-                'CACHEBOOST_BOT_USER_AGENTS',
-                'CACHEBOOST_ASSET_CACHE_ENABLED',
-                'CACHEBOOST_ASSET_EXTENSIONS',
-                'CACHEBOOST_ASSET_DURATION',
-                'CACHEBOOST_CACHE_HOMEPAGE',
-                'CACHEBOOST_CACHE_CATEGORY',
-                'CACHEBOOST_CACHE_PRODUCT',
-                'CACHEBOOST_CACHE_CMS',
-                'CACHEBOOST_AUTO_WARMUP',
-                'CACHEBOOST_PURGE_AGE',
-                'CACHEBOOST_PURGE_SIZE',
-                'CACHEBOOST_HITS',
-                'CACHEBOOST_MISSES',
-                'CACHEBOOST_LAST_FLUSH',
-                'CACHEBOOST_WARMING_QUEUE'
+                'DURATION',
+                'EXCLUDE',
+                'ENGINE',
+                'REDIS_IP',
+                'REDIS_PORT',
+                'MEMCACHED_IP',
+                'MEMCACHED_PORT',
+                'ENABLED',
+                'ENABLE_DEV_MODE',
+                'COMPRESSION_ENABLED',
+                'CACHE_AJAX',
+                'BOT_CACHE_ENABLED',
+                'BOT_USER_AGENTS',
+                'ASSET_CACHE_ENABLED',
+                'ASSET_EXTENSIONS',
+                'ASSET_DURATION',
+                'CACHE_HOMEPAGE',
+                'CACHE_CATEGORY',
+                'CACHE_PRODUCT',
+                'CACHE_CMS',
+                'AUTO_WARMUP',
+                'PURGE_AGE',
+                'PURGE_SIZE',
+                'HITS',
+                'MISSES',
+                'LAST_FLUSH',
+                'WARMING_QUEUE'
             ] as $key) {
-                ConfigurationService::delete($key);
+                $configurationService->delete($key);
             }
 
             // Nettoyage du cache
-            CacheManager::uninstallCache();
+            $this->get('macymedcacheboost.cache_manager')->uninstallCache();
 
             // Suppression des onglets
             $this->uninstallTabs();
@@ -389,14 +393,14 @@ class MacymedCacheBoost extends Module
 
     public function hookActionDispatcherBefore($params)
     {
-        CacheManager::checkAndServeCache();
+        $this->get('macymedcacheboost.cache_manager')->checkAndServeCache();
     }
 
     
     public function hookActionFrontControllerInitBefore($params)
 
     {
-        CacheManager::checkAndServeCache();
+        $this->get('macymedcacheboost.cache_manager')->checkAndServeCache();
     }
 
     public function hookActionProductUpdate($params)

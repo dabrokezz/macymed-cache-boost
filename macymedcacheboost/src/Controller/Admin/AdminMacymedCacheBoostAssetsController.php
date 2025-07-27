@@ -7,31 +7,27 @@ if (!defined('_PS_VERSION_')) {
 }
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
-use MacymedCacheBoost\Services\AdminConfigurationHandlerService;
+use MacymedCacheBoost\Form\AssetsType;
 use MacymedCacheBoost\Services\ConfigurationService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMacymedCacheBoostAssetsController extends FrameworkBundleAdminController
 {
-    public function indexAction(): Response
+    public function indexAction(Request $request): Response
     {
-        // Gérer le postProcess si le formulaire est soumis
-        if (\Tools::isSubmit('submit_cacheboost_config')) {
-            AdminConfigurationHandlerService::handleForm($this->token, $this);
+        $form = $this->createForm(AssetsType::class, $this->get('macymedcacheboost.configuration.service')->getAllConfigValues());
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $this->get('macymedcacheboost.configuration.service')->updateBulk($data);
+            $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
         }
 
-        $this->assignVariablesToSmartyTpl();
-
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostassets.html.twig', [
-            // Passez ici les variables nécessaires à votre template Twig
-            // Exemple: 'some_variable' => $this->someService->getData(),
+            'form' => $form->createView(),
         ]);
-    }
-
-    private function assignVariablesToSmartyTpl()
-    {
-        // Cette méthode est conservée pour la compatibilité si des templates Smarty sont encore utilisés
-        // ou si des variables doivent être assignées au contexte Smarty global.
-        $this->context->smarty->assign(ConfigurationService::getAllConfigValues());
     }
 }
