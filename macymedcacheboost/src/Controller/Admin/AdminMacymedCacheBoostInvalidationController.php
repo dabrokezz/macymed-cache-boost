@@ -6,24 +6,21 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use ModuleAdminController;
+use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use MacymedCacheBoost\Services\AdminAjaxHandlerService;
 use MacymedCacheBoost\Services\ConfigurationService;
+use Symfony\Component\HttpFoundation\Response;
 use Tools;
 
-class AdminMacymedCacheBoostInvalidationController extends ModuleAdminController
+class AdminMacymedCacheBoostInvalidationController extends FrameworkBundleAdminController
 {
-    public function __construct()
+    public function indexAction(): Response
     {
-        parent::__construct();
-        $this->bootstrap = true;
-    }
-
-    public function initContent()
-    {
-        parent::initContent();
         $this->assignVariablesToSmartyTpl();
-        $this->setTemplate('adminmacymedcacheboostinvalidation.tpl');
+
+        return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostinvalidation.html.twig', [
+            // Passez ici les variables nécessaires à votre template Twig
+        ]);
     }
 
     public function ajaxProcess($action = null)

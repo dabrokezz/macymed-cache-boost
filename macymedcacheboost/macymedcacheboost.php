@@ -53,9 +53,9 @@ class MacymedCacheBoost extends Module
             }
 
             // Enregistrement des hooks
-            if (!$this->installHooks()) {
-                return false;
-            }
+            // if (!$this->installHooks()) {
+            //     return false;
+            // }
 
             // Installation des onglets
             if (!$this->installTabs()) {
@@ -144,8 +144,6 @@ class MacymedCacheBoost extends Module
     private function installHooks()
     {
         $hooks = [
-            'actionDispatcherBefore',
-            'actionFrontControllerInitBefore',
             'actionProductUpdate',
             'actionProductDelete',
             'actionCategoryUpdate',
@@ -164,51 +162,36 @@ class MacymedCacheBoost extends Module
 
     private function installTabs()
     {
-        // Installation des onglets avec gestion d'erreur
-        $parentTabId = (int) Tab::getIdFromClassName('IMPROVE');
-        if (!$parentTabId) {
-            $parentTabId = (int) Tab::getIdFromClassName('AdminParentModulesSf');
-        }
-
-        if (!$parentTabId) {
-            $this->_errors[] = $this->l('Could not find parent tab for module.');
-            return false;
-        }
-
-        // Suppression des onglets existants (en cas de réinstallation)
-        $this->uninstallTabs();
-
-        // Création de l'onglet principal
-        $mainTab = new Tab();
-        $mainTab->class_name = 'AdminMacymedCacheBoost';
-        $mainTab->id_parent = $parentTabId;
-        $mainTab->module = $this->name;
-        $mainTab->active = 1;
-        $mainTab->icon = 'cached';
-
-        foreach (Language::getLanguages(true) as $lang) {
-            $mainTab->name[$lang['id_lang']] = 'Macymed CacheBoost';
-        }
-
-        if (!$mainTab->save()) {
-            $this->_errors[] = $this->l('Failed to create main tab.');
-            return false;
-        }
-
-        // Création des sous-onglets
-        foreach ($this->getTabs() as $tabData) {
-            if ($tabData['class_name'] === 'AdminMacymedCacheBoost') {
-                continue;
-            }
-
+        $tabs = $this->getTabs();
+        foreach ($tabs as $tabData) {
             $tab = new Tab();
             $tab->class_name = $tabData['class_name'];
-            $tab->id_parent = (int) Tab::getIdFromClassName('AdminMacymedCacheBoost');
             $tab->module = $this->name;
             $tab->active = 1;
+            $tab->icon = $tabData['icon'] ?? '';
 
+            // Définir le nom de l'onglet pour toutes les langues
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $tabData['name'];
+            }
+
+            // Définir le parent
+            if (isset($tabData['parent_class_name'])) {
+                $parentTabId = (int) Tab::getIdFromClassName($tabData['parent_class_name']);
+                if (!$parentTabId) {
+                    // Fallback pour les onglets parents si non trouvés (ex: IMPROVE)
+                    if ($tabData['parent_class_name'] === 'IMPROVE') {
+                        $parentTabId = (int) Tab::getIdFromClassName('AdminParentModulesSf');
+                    }
+                }
+                $tab->id_parent = $parentTabId;
+            } else {
+                $tab->id_parent = 0; // Onglet racine si aucun parent n'est spécifié
+            }
+
+            // Définir la route Symfony si elle existe
+            if (isset($tabData['route_name'])) {
+                $tab->route_name = $tabData['route_name'];
             }
 
             if (!$tab->save()) {
@@ -222,16 +205,16 @@ class MacymedCacheBoost extends Module
 
     private function uninstallTabs()
     {
-        $tabClasses = array_merge(
-            ['AdminMacymedCacheBoost'],
-            array_column($this->getTabs(), 'class_name')
-        );
-
-        foreach ($tabClasses as $tabClass) {
-            $id_tab = (int) Tab::getIdFromClassName($tabClass);
+        $tabs = $this->getTabs();
+        foreach ($tabs as $tabData) {
+            $id_tab = (int) Tab::getIdFromClassName($tabData['class_name']);
             if ($id_tab) {
                 $tab = new Tab($id_tab);
-                $tab->delete();
+                try {
+                    $tab->delete();
+                } catch (\Exception $e) {
+                    PrestaShopLogger::addLog('[CacheBoost] Failed to delete tab ' . $tabData['class_name'] . ': ' . $e->getMessage(), 3);
+                }
             }
         }
     }
@@ -249,6 +232,67 @@ class MacymedCacheBoost extends Module
         foreach ($rows as $row) {
             $this->unregisterHook($row['name']);
         }
+    }
+
+    public function getTabs()
+    {
+        return [
+            [
+                'class_name' => 'AdminMacymedCacheBoostDashboard',
+                'route_name' => 'macymedcacheboost_dashboard',
+                'name' => $this->l('CacheBoost'),
+                'icon' => 'cached',
+                'parent_class_name' => 'IMPROVE'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostGeneral',
+                'route_name' => 'macymedcacheboost_general',
+                'name' => $this->l('General Settings'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostPageTypes',
+                'route_name' => 'macymedcacheboost_pagetypes',
+                'name' => $this->l('Page Types'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostAssets',
+                'route_name' => 'macymedcacheboost_assets',
+                'name' => $this->l('Assets'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostBots',
+                'route_name' => 'macymedcacheboost_bots',
+                'name' => $this->l('Bots'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostInvalidation',
+                'route_name' => 'macymedcacheboost_invalidation',
+                'name' => $this->l('Invalidation'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostWarmer',
+                'route_name' => 'macymedcacheboost_warmer',
+                'name' => $this->l('Warmer'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostRedis',
+                'route_name' => 'macymedcacheboost_redis',
+                'name' => $this->l('Redis'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+            [
+                'class_name' => 'AdminMacymedCacheBoostMemcached',
+                'route_name' => 'macymedcacheboost_memcached',
+                'name' => $this->l('Memcached'),
+                'parent_class_name' => 'AdminMacymedCacheBoostDashboard'
+            ],
+        ];
     }
 
     // Amélioration de la méthode uninstall() également

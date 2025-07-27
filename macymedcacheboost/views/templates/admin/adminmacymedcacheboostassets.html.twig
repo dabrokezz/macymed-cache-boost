@@ -1,0 +1,71 @@
+{#**
+ * 2007-2024 PrestaShop
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2007-2025 PrestaShop SA
+ * @license   https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ *}
+#}
+
+<form id="module_form" class="defaultForm form-horizontal" action="{{ app.request.uri }}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="token" value="{{ token }}" />
+
+    <div class="panel">
+        <h4>{{ 'Asset Cache Settings'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h4>
+        <!-- Asset Cache Enabled Toggle -->
+        <div class="form-group">
+            <label class="control-label col-lg-3">{{ 'Enable Asset Caching'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
+            <div class="col-lg-9">
+                <span class="switch prestashop-switch fixed-width-lg">
+                    <input type="radio" name="CACHEBOOST_ASSET_CACHE_ENABLED" id="asset_cache_on" value="1" {% if asset_cache_enabled %}checked="checked"{% endif %} />
+                    <label for="asset_cache_on" class="radioCheck">{{ 'Yes'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
+                    <input type="radio" name="CACHEBOOST_ASSET_CACHE_ENABLED" id="asset_cache_off" value="0" {% if not asset_cache_enabled %}checked="checked"{% endif %} />
+                    <label for="asset_cache_off" class="radioCheck">{{ 'No'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
+                    <a class="slide-button btn"></a>
+                </span>
+                <p class="help-block">{{ 'Cache static assets (JS, CSS, Images) to improve loading times.'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+            </div>
+        </div>
+
+        <!-- Asset Extensions -->
+        <div class="form-group">
+            <label class="control-label col-lg-3">{{ 'Asset File Extensions (comma-separated)'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
+            <div class="col-lg-9">
+                <input type="text" name="CACHEBOOST_ASSET_EXTENSIONS" value="{{ asset_extensions }}" class="form-control" />
+                <p class="help-block">{{ 'List of file extensions to cache as assets (e.g., js,css,png,jpg).'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+            </div>
+        </div>
+
+        <!-- Asset Cache Duration -->
+        <div class="form-group">
+            <label class="control-label col-lg-3">{{ 'Asset Cache Duration (seconds)'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
+            <div class="col-lg-9">
+                <input type="number" name="CACHEBOOST_ASSET_DURATION" value="{{ asset_duration }}" class="form-control" />
+                <p class="help-block">{{ 'How long assets should be cached by the browser and proxy servers.'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Footer -->
+    <div class="panel-footer">
+        <button type="submit" value="1" id="module_form_submit_btn" name="submit_cacheboost_config" class="btn btn-success pull-right">
+            <i class="process-icon-save"></i> {{ 'Save'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+        </button>
+    </div>
+</form>

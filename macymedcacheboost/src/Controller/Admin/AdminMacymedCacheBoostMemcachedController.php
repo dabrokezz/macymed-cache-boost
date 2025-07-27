@@ -6,29 +6,25 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use ModuleAdminController;
+use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use MacymedCacheBoost\Services\AdminConfigurationHandlerService;
 use MacymedCacheBoost\Services\ConfigurationService;
+use Symfony\Component\HttpFoundation\Response;
 
-class AdminMacymedCacheBoostMemcachedController extends ModuleAdminController
+class AdminMacymedCacheBoostMemcachedController extends FrameworkBundleAdminController
 {
-    public function __construct()
+    public function indexAction(): Response
     {
-        parent::__construct();
-        $this->bootstrap = true;
-    }
+        // Gérer le postProcess si le formulaire est soumis
+        if (\Tools::isSubmit('submit_cacheboost_config')) {
+            AdminConfigurationHandlerService::handleForm($this->token, $this);
+        }
 
-    public function initContent()
-    {
-        parent::initContent();
         $this->assignVariablesToSmartyTpl();
-        $this->setTemplate('adminmacymedcacheboostmemcached.tpl');
-    }
 
-    public function postProcess()
-    {
-        AdminConfigurationHandlerService::handleForm($this->token, $this);
-        return parent::postProcess();
+        return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostmemcached.html.twig', [
+            // Passez ici les variables nécessaires à votre template Twig
+        ]);
     }
 
     private function assignVariablesToSmartyTpl()

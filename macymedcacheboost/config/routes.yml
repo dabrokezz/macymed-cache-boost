@@ -1,45 +1,72 @@
 # config/routes.yml
 macymedcacheboost_dashboard:
     path: /modules/macymedcacheboost/dashboard
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostDashboardController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostDashboardController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostDashboard'
+        _legacy_link: 'AdminMacymedCacheBoostDashboard'
     methods: [GET]
 
 macymedcacheboost_general:
     path: /modules/macymedcacheboost/general
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostGeneralController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostGeneralController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostGeneral'
+        _legacy_link: 'AdminMacymedCacheBoostGeneral'
     methods: [GET, POST]
 
 macymedcacheboost_bots:
     path: /modules/macymedcacheboost/bots
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostBotsController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostBotsController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostBots'
+        _legacy_link: 'AdminMacymedCacheBoostBots'
     methods: [GET, POST]
 
 macymedcacheboost_assets: 
     path: /modules/macymedcacheboost/assets
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostAssetsController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostAssetsController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostAssets'
+        _legacy_link: 'AdminMacymedCacheBoostAssets'
     methods: [GET, POST]
 
 macymedcacheboost_pagetypes:
     path: /modules/macymedcacheboost/pagetypes
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostPageTypesController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostPageTypesController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostPageTypes'
+        _legacy_link: 'AdminMacymedCacheBoostPageTypes'
     methods: [GET, POST]
 
 macymedcacheboost_redis:
     path: /modules/macymedcacheboost/redis
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostRedisController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostRedisController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostRedis'
+        _legacy_link: 'AdminMacymedCacheBoostRedis'
     methods: [GET, POST]
 
 macymedcacheboost_memcached:
     path: /modules/macymedcacheboost/memcached
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostMemcachedController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostMemcachedController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostMemcached'
+        _legacy_link: 'AdminMacymedCacheBoostMemcached'
     methods: [GET, POST]
 
 macymedcacheboost_invalidation:
     path: /modules/macymedcacheboost/invalidation
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostInvalidationController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostInvalidationController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostInvalidation'
+        _legacy_link: 'AdminMacymedCacheBoostInvalidation'
     methods: [GET, POST]
 
 macymedcacheboost_warmer:
     path: /modules/macymedcacheboost/warmer
-    controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostWarmerController::index'
+    defaults:
+        _controller: 'MacymedCacheBoost\Controller\Admin\AdminMacymedCacheBoostWarmerController::indexAction'
+        _legacy_controller: 'AdminMacymedCacheBoostWarmer'
+        _legacy_link: 'AdminMacymedCacheBoostWarmer'
     methods: [GET, POST]

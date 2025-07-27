@@ -6,34 +6,28 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use ModuleAdminController;
+use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use MacymedCacheBoost\Services\AdminAjaxHandlerService;
 use MacymedCacheBoost\Services\ConfigurationService;
 use MacymedCacheBoost\Services\WarmingQueueService;
+use Symfony\Component\HttpFoundation\Response;
 use Tools;
 
-class AdminMacymedCacheBoostWarmerController extends ModuleAdminController
+class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminController
 {
-    public function __construct()
+    public function indexAction(): Response
     {
-        parent::__construct();
-        $this->bootstrap = true;
-    }
-
-    public function initContent()
-    {
-        parent::initContent();
-        $this->assignVariablesToSmartyTpl();
-        $this->setTemplate('adminmacymedcacheboostwarmer.tpl');
-    }
-
-    public function postProcess()
-    {
-        if (Tools::isSubmit('submit_cacheboost_warmer_config')) {
+        // Gérer le postProcess si le formulaire est soumis
+        if (\Tools::isSubmit('submit_cacheboost_warmer_config')) {
             ConfigurationService::update('CACHEBOOST_AUTO_WARMUP', (bool) Tools::getValue('CACHEBOOST_AUTO_WARMUP'));
-            $this->confirmations[] = $this->trans('Settings updated', [], 'Admin.Notifications.Success');
+            $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
         }
-        return parent::postProcess();
+
+        $this->assignVariablesToSmartyTpl();
+
+        return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostwarmer.html.twig', [
+            'warming_queue_count' => WarmingQueueService::getQueueCount(),
+        ]);
     }
 
     public function ajaxProcess($action = null)
@@ -51,6 +45,5 @@ class AdminMacymedCacheBoostWarmerController extends ModuleAdminController
     private function assignVariablesToSmartyTpl()
     {
         $this->context->smarty->assign(ConfigurationService::getAllConfigValues());
-        $this->context->smarty->assign('warming_queue_count', WarmingQueueService::getQueueCount());
     }
 }

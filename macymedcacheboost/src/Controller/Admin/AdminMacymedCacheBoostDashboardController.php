@@ -6,30 +6,29 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use ModuleAdminController;
+use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use MacymedCacheBoost\Services\ConfigurationService;
 use PrestaShopLogger;
 use Redis;
 use Context;
+use Symfony\Component\HttpFoundation\Response;
 
-class AdminMacymedCacheBoostDashboardController extends ModuleAdminController
+class AdminMacymedCacheBoostDashboardController extends FrameworkBundleAdminController
 {
-    public function __construct()
+    public function indexAction(): Response
     {
-        parent::__construct();
-        $this->bootstrap = true;
-    }
-
-    public function initContent()
-    {
-        parent::initContent();
         $this->assignVariablesToSmartyTpl();
-        $this->setTemplate('adminmacymedcacheboostdashboard.tpl');
+
+        return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostdashboard.html.twig', [
+            'cache_stats' => $this->getCacheStatistics(),
+        ]);
     }
 
     private function assignVariablesToSmartyTpl()
     {
-        $this->context->smarty->assign('cache_stats', $this->getCacheStatistics());
+        // Cette méthode est conservée pour la compatibilité si des templates Smarty sont encore utilisés
+        // ou si des variables doivent être assignées au contexte Smarty global.
+        // $this->context->smarty->assign('cache_stats', $this->getCacheStatistics());
     }
 
     private function getCacheStatistics()
