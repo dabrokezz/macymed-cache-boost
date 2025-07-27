@@ -24,21 +24,22 @@ class AdminMacymedCacheBoostDashboardController extends FrameworkBundleAdminCont
 
     private function getCacheStatistics()
     {
-        $engine = ConfigurationService::get('CACHEBOOST_ENGINE', 'filesystem');
+        $configurationService = $this->get('macymedcacheboost.configuration.service');
+        $engine = $configurationService->get('ENGINE', 'filesystem');
         $stats = [
             'count' => 'N/A',
             'size' => 'N/A',
             'engine' => $engine,
-            'hits' => (int) ConfigurationService::get('CACHEBOOST_HITS', 0),
-            'misses' => (int) ConfigurationService::get('CACHEBOOST_MISSES', 0),
-            'last_flush' => ConfigurationService::get('CACHEBOOST_LAST_FLUSH', $this->trans('Never', [], 'Modules.Macymedcacheboost.Admin')),
+            'hits' => (int) $configurationService->get('HITS', 0),
+            'misses' => (int) $configurationService->get('MISSES', 0),
+            'last_flush' => $configurationService->get('LAST_FLUSH', $this->trans('Never', [], 'Modules.Macymedcacheboost.Admin')),
         ];
 
         if ($engine === 'redis') {
             if (class_exists('Redis')) {
                 try {
                     $redis = new \Redis();
-                    if (@$redis->connect(ConfigurationService::get('CACHEBOOST_REDIS_IP'), ConfigurationService::get('CACHEBOOST_REDIS_PORT'), 1)) {
+                    if (@$redis->connect($configurationService->get('REDIS_IP'), $configurationService->get('REDIS_PORT'), 1)) {
                         $iterator = null;
                         $keys = [];
                         while ($scanned_keys = $redis->scan($iterator, 'cacheboost:*')) {

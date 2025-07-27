@@ -17,7 +17,7 @@ class AdminMacymedCacheBoostInvalidationController extends FrameworkBundleAdminC
     public function indexAction(): Response
     {
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostinvalidation.html.twig', [
-            'config_values' => ConfigurationService::getAllConfigValues(),
+            'config_values' => $this->get('macymedcacheboost.configuration.service')->getAllConfigValues(),
         ]);
     }
 

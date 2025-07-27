@@ -415,35 +415,35 @@ class MacymedCacheBoost extends Module
     public function hookActionProductUpdate($params)
     {
         if (isset($params['product'])) {
-            CacheService::invalidateProductCache($params['product']->id);
+            $this->get('macymedcacheboost.cache.service')->invalidateProductCache($params['product']->id);
         }
     }
 
     public function hookActionProductDelete($params)
     {
         if (isset($params['object'])) {
-            CacheService::invalidateProductCache($params['object']->id);
+            $this->get('macymedcacheboost.cache.service')->invalidateProductCache($params['object']->id);
         }
     }
 
     public function hookActionCategoryUpdate($params)
     {
         if (isset($params['object'])) {
-            CacheService::invalidateCategoryCache($params['object']->id);
+            $this->get('macymedcacheboost.cache.service')->invalidateCategoryCache($params['object']->id);
         }
     }
 
     public function hookActionCategoryDelete($params)
     {
         if (isset($params['object'])) {
-            CacheService::invalidateCategoryCache($params['object']->id);
+            $this->get('macymedcacheboost.cache.service')->invalidateCategoryCache($params['object']->id);
         }
     }
 
     public function hookActionAfterUpdateCmsPageFormHandler($params)
     {
         if (isset($params['object'])) {
-            CacheService::invalidateCmsCache($params['object']->id);
+            $this->get('macymedcacheboost.cache.service')->invalidateCmsCache($params['object']->id);
         }
     }
 
