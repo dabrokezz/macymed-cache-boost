@@ -22,7 +22,9 @@
  * @license   https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  *}
 #}
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
 
+{% block content %}
 <div class="panel">
     <h3><i class="icon icon-eraser"></i> {{ 'Granular Cache Invalidation'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h3>
     <p>{{ 'Invalidate cache for specific content types or URLs.'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
@@ -79,9 +81,10 @@
         </div>
     </div>
 </div>
-
-{#
-<script type="text/javascript">
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+<script >
     $(document).ready(function(){
         function setupInvalidationButton(buttonId, inputId, statusId, actionName) {
             $(buttonId).on('click', function() {
@@ -127,4 +130,4 @@
         setupInvalidationButton('#invalidate_url_btn', '#invalidate_url', '#invalidate_url_status', 'InvalidateUrl');
     });
 </script>
-#}
+{% endblock %}

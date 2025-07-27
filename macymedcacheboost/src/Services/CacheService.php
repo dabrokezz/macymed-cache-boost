@@ -39,13 +39,13 @@ class CacheService
                 try {
                     $redis = new \Redis();
                     if (@$redis->connect($ip, $port, 1)) {
-                        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Redis connection successful!', [], 'Modules.Macymedcacheboost.Admin')];
+                        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Redis connection successful!', 'Modules.Macymedcacheboost.Admin')];
                     } else {
-                        return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Redis connection failed. Check IP and Port.', [], 'Modules.Macymedcacheboost.Admin')];
+                        return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Redis connection failed. Check IP and Port.', 'Modules.Macymedcacheboost.Admin')];
                     }
                 } catch (\Exception $e) {
                     PrestaShopLogger::addLog('MacymedCacheBoost Redis connection error: ' . $e->getMessage(), 3);
-                    return ['success' => false, 'message' => sprintf(Context::getContext()->getTranslator()->trans('Redis connection error: %s', [], 'Modules.Macymedcacheboost.Admin'), $e->getMessage())];
+                    return ['success' => false, 'message' => sprintf(Context::getContext()->getTranslator()->trans('Redis connection error: %s', 'Modules.Macymedcacheboost.Admin'), $e->getMessage())];
                 }
             }
         } elseif ($engine === 'memcached') {
@@ -57,20 +57,20 @@ class CacheService
                         $test_key = 'macymedcacheboost_test_connection';
                         $memcached->set($test_key, 'test', 1);
                         if ($memcached->get($test_key) === 'test') {
-                            return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Memcached connection successful!', [], 'Modules.Macymedcacheboost.Admin')];
+                            return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Memcached connection successful!', 'Modules.Macymedcacheboost.Admin')];
                         } else {
-                            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Memcached connection failed. Could not set/get data.', [], 'Modules.Macymedcacheboost.Admin')];
+                            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Memcached connection failed. Could not set/get data.', 'Modules.Macymedcacheboost.Admin')];
                         }
                     } else {
-                        return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Memcached connection failed. Check IP and Port.', [], 'Modules.Macymedcacheboost.Admin')];
+                        return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Memcached connection failed. Check IP and Port.', 'Modules.Macymedcacheboost.Admin')];
                     }
                 } catch (\Exception $e) {
                     PrestaShopLogger::addLog('MacymedCacheBoost Memcached connection error: ' . $e->getMessage(), 3);
-                    return ['success' => false, 'message' => sprintf(Context::getContext()->getTranslator()->trans('Memcached connection error: %s', [], 'Modules.Macymedcacheboost.Admin'), $e->getMessage())];
+                    return ['success' => false, 'message' => sprintf(Context::getContext()->getTranslator()->trans('Memcached connection error: %s', 'Modules.Macymedcacheboost.Admin'), $e->getMessage())];
                 }
             }
         }
-        return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Unknown cache engine.', [], 'Modules.Macymedcacheboost.Admin')];
+        return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Unknown cache engine.', 'Modules.Macymedcacheboost.Admin')];
     }
 
     public function warmUpCache($link)
@@ -81,7 +81,7 @@ class CacheService
         $xml_content = Tools::file_get_contents($sitemap_url);
 
         if (!$xml_content) {
-            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Could not fetch sitemap.xml. Please ensure it is enabled in PrestaShop.', [], 'Modules.Macymedcacheboost.Admin')];
+            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Could not fetch sitemap.xml. Please ensure it is enabled in PrestaShop.', 'Modules.Macymedcacheboost.Admin')];
         }
 
         $urls = [];
@@ -106,7 +106,7 @@ class CacheService
             $response = curl_exec($ch);
 
             if ($response === false) {
-                $errors[] = sprintf(Context::getContext()->getTranslator()->trans('cURL Error for %s: %s', [], 'Modules.Macymedcacheboost.Admin'), $url, curl_error($ch));
+                $errors[] = sprintf(Context::getContext()->getTranslator()->trans('cURL Error for %s: %s', 'Modules.Macymedcacheboost.Admin'), $url, curl_error($ch));
                 curl_close($ch);
                 continue;
             }
@@ -119,9 +119,9 @@ class CacheService
             }
         }
 
-        $message = sprintf(Context::getContext()->getTranslator()->trans('%d URLs processed.', [], 'Modules.Macymedcacheboost.Admin'), $warmed_count);
+        $message = sprintf(Context::getContext()->getTranslator()->trans('%d URLs processed.', 'Modules.Macymedcacheboost.Admin'), $warmed_count);
         if (!empty($errors)) {
-            $message .= ' ' . sprintf(Context::getContext()->getTranslator()->trans('%d errors occurred. First error: %s', [], 'Modules.Macymedcacheboost.Admin'), count($errors), $errors[0]);
+            $message .= ' ' . sprintf(Context::getContext()->getTranslator()->trans('%d errors occurred. First error: %s', 'Modules.Macymedcacheboost.Admin'), count($errors), $errors[0]);
         }
 
         return ['success' => true, 'message' => $message];
@@ -130,26 +130,26 @@ class CacheService
     public function invalidateAll()
     {
         $this->cacheManager->invalidateAll();
-        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Full cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
+        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Full cache invalidated.', 'Modules.Macymedcacheboost.Admin')];
     }
 
     private function _handleInvalidationAndWarmup($url, $message_key)
     {
         if (empty($url)) {
-            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('URL cannot be empty.', [], 'Modules.Macymedcacheboost.Admin')];
+            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('URL cannot be empty.', 'Modules.Macymedcacheboost.Admin')];
         }
         $this->cacheManager->invalidateUrl($url);
         if ($this->configurationService->get('AUTO_WARMUP')) {
             $this->warmingQueueService->addUrlToQueue($url);
         }
 
-        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans($message_key, [], 'Modules.Macymedcacheboost.Admin')];
+        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans($message_key, 'Modules.Macymedcacheboost.Admin')];
     }
 
     public function invalidateProductCache($id_product)
     {
         if (!$id_product) {
-            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid product ID.', [], 'Modules.Macymedcacheboost.Admin')];
+            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid product ID.', 'Modules.Macymedcacheboost.Admin')];
         }
         $product = new Product($id_product);
         if (is_object($product) && isset($product->id)) {
@@ -165,13 +165,13 @@ class CacheService
             }
         }
 
-        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Product cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
+        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Product cache invalidated.', 'Modules.Macymedcacheboost.Admin')];
     }
 
     public function invalidateCategoryCache($id_category)
     {
         if (!$id_category) {
-            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid category ID.', [], 'Modules.Macymedcacheboost.Admin')];
+            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid category ID.', 'Modules.Macymedcacheboost.Admin')];
         }
         $category = new Category($id_category);
         if (is_object($category) && isset($category->id)) {
@@ -183,13 +183,13 @@ class CacheService
             $this->_handleInvalidationAndWarmup($index_url, 'Homepage cache invalidated.');
         }
 
-        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Category cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
+        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Category cache invalidated.', 'Modules.Macymedcacheboost.Admin')];
     }
 
     public function invalidateCmsCache($id_cms)
     {
         if (!$id_cms) {
-            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid CMS ID.', [], 'Modules.Macymedcacheboost.Admin')];
+            return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid CMS ID.', 'Modules.Macymedcacheboost.Admin')];
         }
         $cms = new CMS($id_cms);
         if (is_object($cms) && isset($cms->id)) {
@@ -197,7 +197,7 @@ class CacheService
             $this->_handleInvalidationAndWarmup($cms_url, 'CMS page cache invalidated.');
         }
 
-        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('CMS page cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
+        return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('CMS page cache invalidated.', 'Modules.Macymedcacheboost.Admin')];
     }
 
     public function invalidateUrl($url)

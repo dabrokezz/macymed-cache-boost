@@ -23,7 +23,7 @@ class AdminMacymedCacheBoostAssetsController extends FrameworkBundleAdminControl
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $this->get('macymedcacheboost.configuration.service')->updateBulk($data);
-            $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
+            $this->addFlash('success', $this->trans('Settings updated',  'Admin.Notifications.Success'));
         }
 
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/form.html.twig', [
