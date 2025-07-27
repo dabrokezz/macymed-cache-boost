@@ -1,115 +1,54 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
 
 {% block content %}
-<form id="module_form" class="defaultForm form-horizontal" action="{{ current }}" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="token" value="{{ token }}" />
-
-    <div class="panel">
-        <h4>{{ 'Automatic Warming Settings'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h4>
-        <div class="form-group">
-            <label class="control-label col-lg-3">{{ 'Warm cache automatically after invalidation'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
-            <div class="col-lg-9">
-                <span class="switch prestashop-switch fixed-width-lg">
-                    <input type="radio" name="CACHEBOOST_AUTO_WARMUP" id="auto_warmup_on" value="1" {% if CACHEBOOST_AUTO_WARMUP %}checked="checked"{% endif %} />
-                    <label for="auto_warmup_on" class="radioCheck">{{ 'Yes'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
-                    <input type="radio" name="CACHEBOOST_AUTO_WARMUP" id="auto_warmup_off" value="0" {% if not CACHEBOOST_AUTO_WARMUP %}checked="checked"{% endif %} />
-                    <label for="auto_warmup_off" class="radioCheck">{{ 'No'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
-                    <a class="slide-button btn"></a>
-                </span>
-                <p class="help-block">{{ 'When content is invalidated, automatically add its URL to a queue to be re-warmed.'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+    {{ form_start(form) }}
+    <div class="card">
+        <div class="card-header">
+            {{ 'Warmer'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+        </div>
+        <div class="card-body">
+            {{ form_widget(form) }}
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-primary">{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
             </div>
         </div>
-        <div class="panel-footer">
-            <button type="submit" value="1" name="submit_cacheboost_warmer_config" class="btn btn-success pull-right">
-                <i class="process-icon-save"></i> {{ 'Save'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
-            </button>
+    </div>
+    {{ form_end(form) }}
+
+    <div class="card mt-4">
+        <div class="card-header">
+            {{ 'Sitemap Cache Warmer'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+        </div>
+        <div class="card-body">
+            <p>{{ 'Pre-load the cache for all your site URLs based on your sitemap. This ensures visitors always get a fast experience.'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+            <button type="button" id="warmup_cache_btn" class="btn btn-primary">{{ 'Start Sitemap Warming'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</button>
+            <div id="warmup_status" class="help-block" style="margin-top: 10px;"></div>
+            <hr>
+            <h4>{{ 'Automatic Sitemap Warming (Cron Job)'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h4>
+            <p>{{ 'To automate cache warming, set up a cron job on your server to run the following URL periodically:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+            <code>{{ warmer_url }}</code>
         </div>
     </div>
-</form>
 
-<div class="panel">
-    <h3><i class="icon icon-rocket"></i> {{ 'Sitemap Cache Warmer'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h3>
-    <p>{{ 'Pre-load the cache for all your site URLs based on your sitemap. This ensures visitors always get a fast experience.'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
-    <button type="button" id="warmup_cache_btn" class="btn btn-primary">{{ 'Start Sitemap Warming'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</button>
-    <div id="warmup_status" class="help-block" style="margin-top: 10px;"></div>
-    <hr>
-    <h4>{{ 'Automatic Sitemap Warming (Cron Job)'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h4>
-    <p>{{ 'To automate cache warming, set up a cron job on your server to run the following URL periodically:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
-    <code>{{ link.getAdminLink("AdminMacymedCacheBoostWarmer") }}&action=WarmUpCache&ajax=1&token={{ getAdminToken('AdminMacymedCacheBoostWarmer') }}</code>
-</div>
-
-<div class="panel">
-    <h3><i class="icon icon-list-alt"></i> {{ 'Invalidation Queue'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h3>
-    <p>{{ 'There are currently %s URLs in the warming queue.'|trans({'%s': warming_queue_count}, 'Modules.Macymedcacheboost.Admin') }}</p>
-    <button type="button" id="process_queue_btn" class="btn btn-primary" {% if warming_queue_count == 0 %}disabled="disabled"{% endif %}>{{ 'Process Queue Now'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</button>
-    <div id="queue_status" class="help-block" style="margin-top: 10px;"></div>
-</div>
+    <div class="card mt-4">
+        <div class="card-header">
+            {{ 'Invalidation Queue'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+        </div>
+        <div class="card-body">
+            <p>{{ 'There are currently %s URLs in the warming queue.'|trans({'%s': warming_queue_count}, 'Modules.Macymedcacheboost.Admin') }}</p>
+            <button type="button" id="process_queue_btn" class="btn btn-primary" {% if warming_queue_count == 0 %}disabled="disabled"{% endif %}>{{ 'Process Queue Now'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</button>
+            <div id="queue_status" class="help-block" style="margin-top: 10px;"></div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script type="text/javascript">
-        $(document).ready(function(){
-            // Sitemap Warmer
-            $('#warmup_cache_btn').on('click', function(){
-                var $btn = $(this);
-                var $status = $('#warmup_status');
-
-                $btn.attr('disabled', true);
-                $status.text('Warming up... This may take a while. Please do not close this page.').removeClass('text-success text-danger');
-
-                $.ajax({
-                    url: '{{ link.getAdminLink("AdminMacymedCacheBoostWarmer") }}&ajax=1&action=WarmUpCache',
-                    type: 'POST',
-                    dataType: 'json',
-                    success: function(data) {
-                        if (data.success) {
-                            $status.text(data.message).addClass('text-success');
-                        } else {
-                            $status.text(data.message).addClass('text-danger');
-                        }
-                    },
-                    error: function() {
-                        $status.text('An unexpected error occurred during warm-up.').addClass('text-danger');
-                    },
-                    complete: function() {
-                        $btn.attr('disabled', false);
-                    }
-                });
-            });
-
-            // Queue Processor
-            $('#process_queue_btn').on('click', function(){
-                var $btn = $(this);
-                var $status = $('#queue_status');
-
-                $btn.attr('disabled', true);
-                $status.text('Processing queue...').removeClass('text-success text-danger');
-
-                $.ajax({
-                    url: '{{ link.getAdminLink("AdminMacymedCacheBoostWarmer") }}&ajax=1&action=ProcessWarmingQueue',
-                    type: 'POST',
-                    dataType: 'json',
-                    success: function(data) {
-                        if (data.success) {
-                            $status.text(data.message).addClass('text-success');
-                            // Update queue count on success
-                            $('#process_queue_btn').prop('disabled', true).parent().find('p').text('There are currently 0 URLs in the warming queue.');
-                        } else {
-                            $status.text(data.message).addClass('text-danger');
-                        }
-                    },
-                    error: function() {
-                        $status.text('An unexpected error occurred while processing the queue.').addClass('text-danger');
-                    },
-                    complete: function() {
-                        // Re-enable button if there was an error, as the queue might still have items
-                        if (!$status.hasClass('text-success')) {
-                            $btn.attr('disabled', false);
-                        }
-                    }
-                });
-            });
+    <script>
+        $(document).ready(function() {
+            // Your jQuery code here
         });
     </script>
 {% endblock %}
