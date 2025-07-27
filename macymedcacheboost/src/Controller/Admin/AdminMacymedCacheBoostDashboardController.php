@@ -32,7 +32,7 @@ class AdminMacymedCacheBoostDashboardController extends FrameworkBundleAdminCont
             'engine' => $engine,
             'hits' => (int) $configurationService->get('HITS', 0),
             'misses' => (int) $configurationService->get('MISSES', 0),
-            'last_flush' => $configurationService->get('LAST_FLUSH', $this->trans('Never', [], 'Modules.Macymedcacheboost.Admin')),
+'last_flush' => $configurationService->get('LAST_FLUSH', $this->trans('Never', 'Modules.Macymedcacheboost.Admin')),
         ];
 
         if ($engine === 'redis') {
@@ -46,17 +46,17 @@ class AdminMacymedCacheBoostDashboardController extends FrameworkBundleAdminCont
                             $keys = array_merge($keys, $scanned_keys);
                         }
                         $stats['count'] = count($keys);
-                        $stats['size'] = $this->trans('Not applicable for Redis', [], 'Modules.Macymedcacheboost.Admin');
+                        $stats['size'] = $this->trans('Not applicable for Redis', 'Modules.Macymedcacheboost.Admin');
                         $redis->close();
                     } else {
-                        $stats['count'] = $this->trans('Connection failed', [], 'Modules.Macymedcacheboost.Admin');
+                        $stats['count'] = $this->trans('Connection failed', 'Modules.Macymedcacheboost.Admin');
                     }
                 } catch (\Exception $e) {
                     PrestaShopLogger::addLog('MacymedCacheBoost Redis statistics error: ' . $e->getMessage(), 3);
-                    $stats['count'] = $this->trans('Connection error', [], 'Modules.Macymedcacheboost.Admin');
+                    $stats['count'] = $this->trans('Connection error', 'Modules.Macymedcacheboost.Admin');
                 }
             } else {
-                $stats['count'] = $this->trans('Redis extension not installed', [], 'Modules.Macymedcacheboost.Admin');
+                $stats['count'] = $this->trans('Redis extension not installed', 'Modules.Macymedcacheboost.Admin');
             }
         } else { // Filesystem
             $files = glob(_PS_MODULE_DIR_ . 'macymedcacheboost/cache/html/*.html');
