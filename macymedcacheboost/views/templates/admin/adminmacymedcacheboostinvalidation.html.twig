@@ -103,7 +103,7 @@
 
                 $.ajax({
                     // L'URL AJAX doit être générée via le routeur Symfony
-                    url: '{{ path('macymedcacheboost_invalidation_ajax', {'action': actionName}) }}',
+                    url: '{{ path('macymedcacheboost_invalidation_ajax') }}' + '?action=' + actionName,
                     type: 'POST',
                     dataType: 'json',
                     data: data,

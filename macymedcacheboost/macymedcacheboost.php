@@ -402,14 +402,14 @@ class MacymedCacheBoost extends Module
 
     public function hookActionDispatcherBefore($params)
     {
-        $this->get('macymedcacheboost.cache_manager')->checkAndServeCache();
+        // Empty on purpose, logic is now handled by the request listener
     }
 
     
     public function hookActionFrontControllerInitBefore($params)
 
     {
-        $this->get('macymedcacheboost.cache_manager')->checkAndServeCache();
+        // Empty on purpose, logic is now handled by the request listener
     }
 
     public function hookActionProductUpdate($params)
