@@ -12,6 +12,8 @@ use MacymedCacheBoost\Services\ConfigurationService;
 
 class MacymedCacheBoost extends Module
 {
+    private static $cacheManager = null;
+
     public function __construct()
     {
         $this->name = 'macymedcacheboost';
@@ -27,6 +29,11 @@ class MacymedCacheBoost extends Module
         $this->description = $this->l('A powerful and safe cache module for PrestaShop 8.1+.');
 
         $this->ps_versions_compliancy = ['min' => '8.1.0', 'max' => _PS_VERSION_];
+
+        if (self::$cacheManager === null) {
+            $configService = new ConfigurationService();
+            self::$cacheManager = new CacheManager($configService);
+        }
     }
 
     public function install()
@@ -401,14 +408,18 @@ class MacymedCacheBoost extends Module
 
     public function hookActionDispatcherBefore($params)
     {
-        // Empty on purpose, logic is now handled by the request listener
+        if (self::$cacheManager) {
+            self::$cacheManager->checkAndServeCache();
+        }
     }
 
     
     public function hookActionFrontControllerInitBefore($params)
 
     {
-        // Empty on purpose, logic is now handled by the request listener
+        if (self::$cacheManager) {
+            self::$cacheManager->checkAndServeCache();
+        }
     }
 
     public function hookActionProductUpdate($params)

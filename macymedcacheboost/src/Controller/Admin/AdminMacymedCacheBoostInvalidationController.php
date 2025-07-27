@@ -16,8 +16,10 @@ class AdminMacymedCacheBoostInvalidationController extends FrameworkBundleAdminC
 {
     public function indexAction(): Response
     {
+        $ajax_url = $this->getContext()->link->getAdminLink('AdminMacymedCacheBoostInvalidation', true, [], ['ajax' => 1]);
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostinvalidation.html.twig', [
             'config_values' => $this->get('macymedcacheboost.configuration.service')->getAllConfigValues(),
+            'ajax_url' => $ajax_url,
         ]);
     }
 

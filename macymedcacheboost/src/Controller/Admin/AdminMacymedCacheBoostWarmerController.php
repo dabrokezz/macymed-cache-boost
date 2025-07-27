@@ -28,7 +28,7 @@ class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminControl
             $this->addFlash('success', $this->trans('Settings updated',  'Admin.Notifications.Success'));
         }
 
-        $link = $this->get('router')->generate('macymedcacheboost_cron', ['token' => Tools::getToken(false)]);
+        $link = $this->getContext()->link->getModuleLink('macymedcacheboost', 'cron', ['token' => Tools::getToken(false)]);
 
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostwarmer.html.twig', [
             'form' => $form->createView(),
