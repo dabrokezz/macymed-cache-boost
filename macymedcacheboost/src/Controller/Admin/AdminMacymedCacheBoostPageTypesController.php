@@ -26,8 +26,9 @@ class AdminMacymedCacheBoostPageTypesController extends FrameworkBundleAdminCont
             $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
         }
 
-        return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostpagetypes.html.twig', [
+        return $this->render('@Modules/macymedcacheboost/views/templates/admin/form.html.twig', [
             'form' => $form->createView(),
+            'layoutTitle' => $this->trans('Page Types Settings', 'Modules.Macymedcacheboost.Admin'),
         ]);
     }
 }

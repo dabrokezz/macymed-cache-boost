@@ -18,6 +18,7 @@ class AdminMacymedCacheBoostDashboardController extends FrameworkBundleAdminCont
     public function indexAction(): Response
     {
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostdashboard.html.twig', [
+            'layoutTitle' => $this->trans('Cache Boost Dashboard', 'Modules.Macymedcacheboost.Admin'),
             'cache_stats' => $this->getCacheStatistics(),
         ]);
     }
