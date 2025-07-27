@@ -7,21 +7,27 @@ if (!defined('_PS_VERSION_')) {
 }
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
-use MacymedCacheBoost\Services\AdminConfigurationHandlerService;
+use MacymedCacheBoost\Form\GeneralType;
 use MacymedCacheBoost\Services\ConfigurationService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMacymedCacheBoostGeneralController extends FrameworkBundleAdminController
 {
-    public function indexAction(): Response
+    public function indexAction(Request $request): Response
     {
-        // Gérer le postProcess si le formulaire est soumis
-        if (\Tools::isSubmit('submit_cacheboost_config')) {
-            AdminConfigurationHandlerService::handleForm($this->token, $this);
+        $form = $this->createForm(GeneralType::class, $this->get('macymedcacheboost.configuration.service')->getAllConfigValues());
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $this->get('macymedcacheboost.configuration.service')->updateBulk($data);
+            $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
         }
 
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostgeneral.html.twig', [
-            'config_values' => ConfigurationService::getAllConfigValues(),
+            'form' => $form->createView(),
         ]);
     }
 }

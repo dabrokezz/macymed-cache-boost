@@ -3,3 +3,7 @@ services:
         class: MacymedCacheBoost\EventListener\CacheBoostRequestListener
         tags:
             - { name: kernel.event_subscriber }
+
+    macymedcacheboost.configuration.service:
+        class: MacymedCacheBoost\Services\ConfigurationService
+        public: true

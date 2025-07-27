@@ -6,48 +6,63 @@ use Configuration;
 
 class ConfigurationService
 {
-    public static function get($key, $default = null)
+    const CONFIG_PREFIX = 'CACHEBOOST_';
+
+    public function get($key, $default = null)
     {
-        $value = Configuration::get($key);
-        return ($value === false || $value === null) ? $default : $value;
+        return Configuration::get(self::CONFIG_PREFIX . $key, $default);
     }
 
-    public static function update($key, $value)
+    public function update($key, $value)
     {
-        return Configuration::updateValue($key, $value);
+        return Configuration::updateValue(self::CONFIG_PREFIX . $key, $value);
     }
 
-    public static function delete($key)
+    public function getAllConfigValues()
     {
-        return Configuration::deleteByName($key);
+        $keys = $this->getConfigKeys();
+        $values = [];
+        foreach ($keys as $key) {
+            $values[self::CONFIG_PREFIX . $key] = $this->get($key);
+        }
+        return $values;
     }
 
-    public static function getAllConfigValues()
+    public function updateBulk(array $data)
+    {
+        foreach ($data as $key => $value) {
+            if (in_array(str_replace(self::CONFIG_PREFIX, '', $key), $this->getConfigKeys())) {
+                Configuration::updateValue($key, $value);
+            }
+        }
+    }
+
+    private function getConfigKeys()
     {
         return [
-            'duration' => self::get('CACHEBOOST_DURATION', 3600),
-            'exclude' => self::get('CACHEBOOST_EXCLUDE', ''),
-            'engine' => self::get('CACHEBOOST_ENGINE', 'filesystem'),
-            'redis_ip' => self::get('CACHEBOOST_REDIS_IP', '127.0.0.1'),
-            'redis_port' => self::get('CACHEBOOST_REDIS_PORT', 6379),
-            'memcached_ip' => self::get('CACHEBOOST_MEMCACHED_IP', '127.0.0.1'),
-            'memcached_port' => self::get('CACHEBOOST_MEMCACHED_PORT', 11211),
-            'enabled' => (bool) self::get('CACHEBOOST_ENABLED', true),
-            'enable_dev_mode' => (bool) self::get('CACHEBOOST_ENABLE_DEV_MODE', false),
-            'compression_enabled' => (bool) self::get('CACHEBOOST_COMPRESSION_ENABLED', true),
-            'cache_ajax' => (bool) self::get('CACHEBOOST_CACHE_AJAX', false),
-            'bot_cache_enabled' => (bool) self::get('CACHEBOOST_BOT_CACHE_ENABLED', true),
-            'bot_user_agents' => self::get('CACHEBOOST_BOT_USER_AGENTS', 'Lighthouse,Googlebot,Bingbot,Slurp,DuckDuckBot,Baiduspider,YandexBot,AhrefsBot,SemrushBot,DotBot,Exabot,MJ12bot,Screaming Frog SEO Spider,Wget,curl'),
-            'asset_cache_enabled' => (bool) self::get('CACHEBOOST_ASSET_CACHE_ENABLED', false),
-            'asset_extensions' => self::get('CACHEBOOST_ASSET_EXTENSIONS', 'js,css,png,jpg,jpeg,gif,webp,svg'),
-            'asset_duration' => (int) self::get('CACHEBOOST_ASSET_DURATION', 86400),
-            'cache_homepage' => (bool) self::get('CACHEBOOST_CACHE_HOMEPAGE', true),
-            'cache_category' => (bool) self::get('CACHEBOOST_CACHE_CATEGORY', true),
-            'cache_product' => (bool) self::get('CACHEBOOST_CACHE_PRODUCT', true),
-            'cache_cms' => (bool) self::get('CACHEBOOST_CACHE_CMS', true),
-            'CACHEBOOST_AUTO_WARMUP' => (bool) self::get('CACHEBOOST_AUTO_WARMUP', true),
-            'purge_age' => (int) self::get('CACHEBOOST_PURGE_AGE', 0),
-            'purge_size' => (int) self::get('CACHEBOOST_PURGE_SIZE', 0),
+            'ENABLED',
+            'ENABLE_DEV_MODE',
+            'DURATION',
+            'EXCLUDE',
+            'ENGINE',
+            'REDIS_IP',
+            'REDIS_PORT',
+            'MEMCACHED_IP',
+            'MEMCACHED_PORT',
+            'COMPRESSION_ENABLED',
+            'CACHE_AJAX',
+            'BOT_CACHE_ENABLED',
+            'BOT_USER_AGENTS',
+            'ASSET_CACHE_ENABLED',
+            'ASSET_EXTENSIONS',
+            'ASSET_DURATION',
+            'CACHE_HOMEPAGE',
+            'CACHE_CATEGORY',
+            'CACHE_PRODUCT',
+            'CACHE_CMS',
+            'PURGE_AGE',
+            'PURGE_SIZE',
+            'AUTO_WARMUP',
         ];
     }
 }
