@@ -30,6 +30,7 @@ class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminControl
 
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostwarmer.html.twig', [
             'form' => $form->createView(),
+            'layoutTitle' => $this->trans('Cache Warmer Settings', 'Modules.Macymedcacheboost.Admin'),
             'warming_queue_count' => $this->get('macymedcacheboost.warming_queue.service')->getQueueCount(),
         ]);
     }
