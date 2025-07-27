@@ -73,7 +73,7 @@ class CacheManager
 
     private $cache_engine;
     private $redis_client;
-    private a $memcached_client;
+    private $memcached_client;
     private $isAjaxJsonRequest = false;
     private $is_bot = false;
 
@@ -215,7 +215,7 @@ class CacheManager
         $context = Context::getContext();
 
         // Apply these bypasses only for non-bot requests
-        if (!$is_bot) {
+        if (!$this->is_bot) {
             if (defined('_PS_MODE_DEV_') && _PS_MODE_DEV_ && !$this->configurationService->get('ENABLE_DEV_MODE')) {
                 return true;
             }
