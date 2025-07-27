@@ -1,90 +1,19 @@
-{#**
- * 2007-2024 PrestaShop
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/osl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
- *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2025 PrestaShop SA
- * @license   https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- *}
-#}
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
 
-<form id="module_form" class="defaultForm form-horizontal" action="{{ app.request.uri }}" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="token" value="{{ token }}" />
-
-    <div id="redis_options" class="panel">
-        <h4>{{ 'Redis Connection Settings'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h4>
-        <div class="form-group">
-            <label class="control-label col-lg-3">{{ 'Redis Server IP'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
-            <div class="col-lg-3">
-                <input type="text" name="CACHEBOOST_REDIS_IP" id="redis_ip" value="{{ redis_ip }}" class="form-control" />
-            </div>
-            <label class="control-label col-lg-2">{{ 'Redis Server Port'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</label>
-            <div class="col-lg-2">
-                <input type="number" name="CACHEBOOST_REDIS_PORT" id="redis_port" value="{{ redis_port }}" class="form-control" />
-            </div>
-            <div class="col-lg-2">
-                <button type="button" id="test_redis_connection" class="btn btn-info">{{ 'Test Connection'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</button>
-            </div>
-            <div class="col-lg-9 col-lg-offset-3">
-                <p id="redis_test_result" class="help-block"></p>
+{% block content %}
+    {{ form_start(form) }}
+    <div class="card">
+        <div class="card-header">
+            {{ 'Redis'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+        </div>
+        <div class="card-body">
+            {{ form_widget(form) }}
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-primary">{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
             </div>
         </div>
     </div>
-
-    <!-- Form Footer -->
-    <div class="panel-footer">
-        <button type="submit" value="1" id="module_form_submit_btn" name="submit_cacheboost_config" class="btn btn-success pull-right">
-            <i class="process-icon-save"></i> {{ 'Save'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
-        </button>
-    </div>
-</form>
-
-{#
-<script type="text/javascript">
-    $(document).ready(function(){
-        // Test Redis connection via AJAX
-        $('#test_redis_connection').on('click', function(){
-            var $resultP = $('#redis_test_result');
-            $resultP.text('Testing...').removeClass('text-success text-danger');
-
-            $.ajax({
-                // L'URL AJAX doit être générée via le routeur Symfony
-                url: '{{ path('macymedcacheboost_redis_ajax', {'action': 'TestCacheConnection'}) }}',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    engine: 'redis',
-                    ip: $('#redis_ip').val(),
-                    port: $('#redis_port').val()
-                },
-                success: function(data) {
-                    $resultP.text(data.message);
-                    if (data.success) {
-                        $resultP.addClass('text-success');
-                    } else {
-                        $resultP.addClass('text-danger');
-                    }
-                },
-                error: function() {
-                    $resultP.text('AJAX error').addClass('text-danger');
-                }
-            });
-        });
-    });
-</script>
-#}
+    {{ form_end(form) }}
+{% endblock %}
