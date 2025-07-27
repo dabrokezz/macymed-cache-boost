@@ -33,7 +33,7 @@ class AdminMacymedCacheBoostDashboardController extends FrameworkBundleAdminCont
             'engine' => $engine,
             'hits' => (int) $configurationService->get('HITS', 0),
             'misses' => (int) $configurationService->get('MISSES', 0),
-'last_flush' => $configurationService->get('LAST_FLUSH', $this->trans('Never', 'Modules.Macymedcacheboost.Admin')),
+'last_flush' => $configurationService->get('LAST_FLUSH', $this->trans('Never', [], 'Modules.Macymedcacheboost.Admin')),
         ];
 
         if ($engine === 'redis') {

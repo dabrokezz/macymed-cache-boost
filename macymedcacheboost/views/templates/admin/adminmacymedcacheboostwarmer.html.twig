@@ -4,22 +4,35 @@
     {{ form(form) }}
     <div class="card mt-4">
         <div class="card-header">
-            {{ 'Sitemap Cache Warmer'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+            <i class="material-icons">whatshot</i> {{ 'Sitemap Cache Warmer'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
         </div>
         <div class="card-body">
             <p>{{ 'Pre-load the cache for all your site URLs based on your sitemap. This ensures visitors always get a fast experience.'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
             <button type="button" id="warmup_cache_btn" class="btn btn-primary">{{ 'Start Sitemap Warming'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</button>
             <div id="warmup_status" class="help-block" style="margin-top: 10px;"></div>
-            <hr>
-            <h4>{{ 'Automatic Sitemap Warming (Cron Job)'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h4>
-            <p>{{ 'To automate cache warming, set up a cron job on your server to run the following URL periodically:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
-            <code>{{ warmer_url }}</code>
         </div>
     </div>
 
     <div class="card mt-4">
         <div class="card-header">
-            {{ 'Invalidation Queue'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+            <i class="material-icons">schedule</i> {{ 'Automatic Sitemap Warming (Cron Job)'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
+        </div>
+        <div class="card-body">
+            <p>{{ 'To automate cache warming, set up a cron job on your server to run the following URL periodically:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+            <div class="input-group">
+                <input type="text" class="form-control" value="{{ warmer_url }}" readonly>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-primary" type="button" id="copy_warmer_url">
+                        <i class="material-icons">content_copy</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <i class="material-icons">delete_sweep</i> {{ 'Invalidation Queue'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
         </div>
         <div class="card-body">
             <p>{{ 'There are currently %s URLs in the warming queue.'|trans({'%s': warming_queue_count}, 'Modules.Macymedcacheboost.Admin') }}</p>
@@ -33,7 +46,11 @@
     {{ parent() }}
     <script>
         $(document).ready(function() {
-            // Your jQuery code here
+            $('#copy_warmer_url').click(function() {
+                var copyText = $(this).closest('.input-group').find('input');
+                copyText.select();
+                document.execCommand('copy');
+            });
         });
     </script>
 {% endblock %}
