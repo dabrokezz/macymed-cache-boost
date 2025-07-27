@@ -32,6 +32,10 @@ class MacymedCacheBoost extends Module
 
     public function install()
     {
+        if (!parent::install()) {
+            return false;
+        }
+
         try {
             // Vérification des prérequis
             if (version_compare(_PS_VERSION_, '8.1.0', '<')) {
@@ -63,7 +67,7 @@ class MacymedCacheBoost extends Module
             }
 
             Tools::clearAllCache();
-            return parent::install();
+            return true;
 
         } catch (\Exception $e) {
             PrestaShopLogger::addLog('[CacheBoost] Installation error: ' . $e->getMessage(), 3);
