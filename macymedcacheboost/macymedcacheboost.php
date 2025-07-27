@@ -153,9 +153,16 @@ class MacymedCacheBoost extends Module
             'actionAfterUpdateCmsPageFormHandler'
         ];
 
-        foreach ($hooks as $hook) {
-            if (!$this->registerHook($hook)) {
-                $this->_errors[] = $this->l('Failed to register hook: ') . $hook;
+        foreach ($hooks as $hook_name) {
+            $id_hook = \Hook::getIdByName($hook_name);
+            if (!$id_hook) {
+                \PrestaShopLogger::addLog('[CacheBoost] Cannot find hook: ' . $hook_name, 3);
+                $this->_errors[] = $this->l('Cannot find hook: ') . $hook_name;
+                return false;
+            }
+            if (!$this->registerHook($hook_name)) {
+                \PrestaShopLogger::addLog('[CacheBoost] Failed to register hook: ' . $hook_name, 3);
+                $this->_errors[] = $this->l('Failed to register hook: ') . $hook_name;
                 return false;
             }
         }
