@@ -7,17 +7,24 @@ if (!defined('_PS_VERSION_')) {
 }
 
 use Tools;
-use MacymedCacheBoost\Services\CacheService;
-use MacymedCacheBoost\Services\WarmingQueueService;
 
 class AdminAjaxHandlerService
 {
-    public static function handleAjaxRequest($action, $context)
+    private $cacheService;
+    private $warmingQueueService;
+
+    public function __construct(CacheService $cacheService, WarmingQueueService $warmingQueueService)
+    {
+        $this->cacheService = $cacheService;
+        $this->warmingQueueService = $warmingQueueService;
+    }
+
+    public function handleAjaxRequest($action, $context)
     {
         switch ($action) {
             case 'WarmUpCache':
                 try {
-                    $result = CacheService::warmUpCache($context->link);
+                    $result = $this->cacheService->warmUpCache($context->link);
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error warming cache: ' . $e->getMessage()];
                 }
@@ -27,7 +34,7 @@ class AdminAjaxHandlerService
                     $engine = Tools::getValue('engine');
                     $ip = Tools::getValue('ip');
                     $port = Tools::getValue('port');
-                    $result = CacheService::testCacheConnection($engine, $ip, $port);
+                    $result = $this->cacheService->testCacheConnection($engine, $ip, $port);
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error testing connection: ' . $e->getMessage()];
                 }
@@ -35,7 +42,7 @@ class AdminAjaxHandlerService
             case 'InvalidateProductCache':
                 try {
                     $id_product = (int) Tools::getValue('id_product');
-                    $result = CacheService::invalidateProductCache($id_product);
+                    $result = $this->cacheService->invalidateProductCache($id_product);
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error invalidating product cache: ' . $e->getMessage()];
                 }
@@ -43,7 +50,7 @@ class AdminAjaxHandlerService
             case 'InvalidateCategoryCache':
                 try {
                     $id_category = (int) Tools::getValue('id_category');
-                    $result = CacheService::invalidateCategoryCache($id_category);
+                    $result = $this->cacheService->invalidateCategoryCache($id_category);
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error invalidating category cache: ' . $e->getMessage()];
                 }
@@ -51,7 +58,7 @@ class AdminAjaxHandlerService
             case 'InvalidateCmsCache':
                 try {
                     $id_cms = (int) Tools::getValue('id_cms');
-                    $result = CacheService::invalidateCmsCache($id_cms);
+                    $result = $this->cacheService->invalidateCmsCache($id_cms);
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error invalidating CMS cache: ' . $e->getMessage()];
                 }
@@ -59,21 +66,21 @@ class AdminAjaxHandlerService
             case 'InvalidateUrl':
                 try {
                     $url = Tools::getValue('url');
-                    $result = CacheService::invalidateUrl($url);
+                    $result = $this->cacheService->invalidateUrl($url);
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error invalidating URL cache: ' . $e->getMessage()];
                 }
                 break;
             case 'ProcessWarmingQueue':
                 try {
-                    $result = WarmingQueueService::processQueue();
+                    $result = $this->warmingQueueService->processQueue();
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error processing warming queue: ' . $e->getMessage()];
                 }
                 break;
             case 'FlushAllCache':
                 try {
-                    $result = CacheService::invalidateAll();
+                    $result = $this->cacheService->invalidateAll();
                 } catch (\Exception $e) {
                     $result = ['success' => false, 'message' => 'Error flushing all cache: ' . $e->getMessage()];
                 }

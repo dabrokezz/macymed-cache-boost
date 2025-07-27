@@ -26,7 +26,7 @@ class AdminMacymedCacheBoostInvalidationController extends FrameworkBundleAdminC
         if ($action === null) {
             $action = Tools::getValue('action');
         }
-        AdminAjaxHandlerService::handleAjaxRequest($action, $this->context);
+        $this->get('macymedcacheboost.admin_ajax_handler.service')->handleAjaxRequest($action, $this->context);
     }
 
 }

@@ -30,7 +30,7 @@ class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminControl
 
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostwarmer.html.twig', [
             'form' => $form->createView(),
-            'warming_queue_count' => WarmingQueueService::getQueueCount(),
+            'warming_queue_count' => $this->get('macymedcacheboost.warming_queue.service')->getQueueCount(),
         ]);
     }
 
@@ -40,9 +40,9 @@ class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminControl
             $action = Tools::getValue('action');
         }
         if ($action === 'ProcessWarmingQueue') {
-            $result = WarmingQueueService::processQueue();
+            $result = $this->get('macymedcacheboost.warming_queue.service')->processQueue();
             die(json_encode($result));
         }
-        AdminAjaxHandlerService::handleAjaxRequest($action, $this->context);
+        $this->get('macymedcacheboost.admin_ajax_handler.service')->handleAjaxRequest($action, $this->context);
     }
 }
