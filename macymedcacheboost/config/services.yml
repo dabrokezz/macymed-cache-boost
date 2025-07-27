@@ -24,6 +24,9 @@ services:
 
     macymedcacheboost.admin_ajax_handler.service:
         class: MacymedCacheBoost\Services\AdminAjaxHandlerService
+        arguments:
+            - '@macymedcacheboost.cache.service'
+            - '@macymedcacheboost.warming_queue.service'
         public: true
 
 
