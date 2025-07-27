@@ -7,3 +7,15 @@ services:
     macymedcacheboost.configuration.service:
         class: MacymedCacheBoost\Services\ConfigurationService
         public: true
+
+    macymedcacheboost.cache.service:
+        class: MacymedCacheBoost\Services\CacheService
+        public: true
+
+    macymedcacheboost.warming_queue.service:
+        class: MacymedCacheBoost\Services\WarmingQueueService
+        public: true
+
+    macymedcacheboost.admin_ajax_handler.service:
+        class: MacymedCacheBoost\Services\AdminAjaxHandlerService
+        public: true

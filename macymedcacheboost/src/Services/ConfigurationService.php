@@ -18,6 +18,11 @@ class ConfigurationService
         return Configuration::updateValue(self::CONFIG_PREFIX . $key, $value);
     }
 
+    public function delete($key)
+    {
+        return Configuration::deleteByName(self::CONFIG_PREFIX . $key);
+    }
+
     public function getAllConfigValues()
     {
         $keys = $this->getConfigKeys();
