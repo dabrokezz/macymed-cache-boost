@@ -23,9 +23,8 @@ class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminControl
             $this->addFlash('success', $this->trans('Settings updated', [], 'Admin.Notifications.Success'));
         }
 
-        $this->assignVariablesToSmartyTpl();
-
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostwarmer.html.twig', [
+            'config_values' => ConfigurationService::getAllConfigValues(),
             'warming_queue_count' => WarmingQueueService::getQueueCount(),
         ]);
     }
@@ -42,8 +41,4 @@ class AdminMacymedCacheBoostWarmerController extends FrameworkBundleAdminControl
         AdminAjaxHandlerService::handleAjaxRequest($action, $this->context);
     }
 
-    private function assignVariablesToSmartyTpl()
-    {
-        $this->context->smarty->assign(ConfigurationService::getAllConfigValues());
-    }
 }

@@ -20,15 +20,8 @@ class AdminMacymedCacheBoostMemcachedController extends FrameworkBundleAdminCont
             AdminConfigurationHandlerService::handleForm($this->token, $this);
         }
 
-        $this->assignVariablesToSmartyTpl();
-
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostmemcached.html.twig', [
-            // Passez ici les variables nécessaires à votre template Twig
+            'config_values' => ConfigurationService::getAllConfigValues(),
         ]);
-    }
-
-    private function assignVariablesToSmartyTpl()
-    {
-        $this->context->smarty->assign(ConfigurationService::getAllConfigValues());
     }
 }

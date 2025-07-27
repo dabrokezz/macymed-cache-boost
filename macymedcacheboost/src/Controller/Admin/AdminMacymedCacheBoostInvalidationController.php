@@ -16,10 +16,8 @@ class AdminMacymedCacheBoostInvalidationController extends FrameworkBundleAdminC
 {
     public function indexAction(): Response
     {
-        $this->assignVariablesToSmartyTpl();
-
         return $this->render('@Modules/macymedcacheboost/views/templates/admin/adminmacymedcacheboostinvalidation.html.twig', [
-            // Passez ici les variables nécessaires à votre template Twig
+            'config_values' => ConfigurationService::getAllConfigValues(),
         ]);
     }
 
@@ -31,8 +29,4 @@ class AdminMacymedCacheBoostInvalidationController extends FrameworkBundleAdminC
         AdminAjaxHandlerService::handleAjaxRequest($action, $this->context);
     }
 
-    private function assignVariablesToSmartyTpl()
-    {
-        $this->context->smarty->assign(ConfigurationService::getAllConfigValues());
-    }
 }
