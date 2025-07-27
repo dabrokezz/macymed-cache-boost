@@ -1,6 +1,8 @@
 services:
     macymedcacheboost.cache_request_listener:
         class: MacymedCacheBoost\EventListener\CacheBoostRequestListener
+        arguments:
+            - '@macymedcacheboost.cache_manager'
         tags:
             - { name: kernel.event_subscriber }
 
@@ -18,4 +20,10 @@ services:
 
     macymedcacheboost.admin_ajax_handler.service:
         class: MacymedCacheBoost\Services\AdminAjaxHandlerService
+        public: true
+
+    macymedcacheboost.cache_manager:
+        class: MacymedCacheBoost\CacheManager
+        arguments:
+            - '@macymedcacheboost.configuration.service'
         public: true

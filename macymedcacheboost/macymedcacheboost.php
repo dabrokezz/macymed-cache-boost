@@ -145,6 +145,8 @@ class MacymedCacheBoost extends Module
     private function installHooks()
     {
         $hooks = [
+            'actionDispatcherBefore',
+            'actionFrontControllerInitBefore',
             'actionProductUpdate',
             'actionProductDelete',
             'actionCategoryUpdate',
@@ -337,7 +339,7 @@ class MacymedCacheBoost extends Module
             }
 
             // Nettoyage du cache
-            CacheManager::uninstallCache();
+            $this->get('macymedcacheboost.cache_manager')->uninstallCache();
 
             // Suppression des onglets
             $this->uninstallTabs();
@@ -391,14 +393,14 @@ class MacymedCacheBoost extends Module
 
     public function hookActionDispatcherBefore($params)
     {
-        CacheManager::checkAndServeCache();
+        $this->get('macymedcacheboost.cache_manager')->checkAndServeCache();
     }
 
     
     public function hookActionFrontControllerInitBefore($params)
 
     {
-        CacheManager::checkAndServeCache();
+        $this->get('macymedcacheboost.cache_manager')->checkAndServeCache();
     }
 
     public function hookActionProductUpdate($params)
