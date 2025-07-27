@@ -4,6 +4,7 @@ namespace MacymedCacheBoost\Services;
 
 use Context;
 use MacymedCacheBoost\Services\ConfigurationService;
+use MacymedCacheBoost\Services\WarmingQueueService;
 use Tools;
 use Redis;
 use Memcached;
@@ -17,7 +18,21 @@ use PrestaShopLogger;
 
 class CacheService
 {
-    public static function testCacheConnection($engine, $ip, $port)
+    private $configurationService;
+    private $warmingQueueService;
+    private $cacheManager;
+
+    public function __construct(
+        ConfigurationService $configurationService,
+        WarmingQueueService $warmingQueueService,
+        CacheManager $cacheManager
+    ) {
+        $this->configurationService = $configurationService;
+        $this->warmingQueueService = $warmingQueueService;
+        $this->cacheManager = $cacheManager;
+    }
+
+    public function testCacheConnection($engine, $ip, $port)
     {
         if ($engine === 'redis') {
             if (class_exists('Redis')) {
@@ -58,7 +73,7 @@ class CacheService
         return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Unknown cache engine.', [], 'Modules.Macymedcacheboost.Admin')];
     }
 
-    public static function warmUpCache($link)
+    public function warmUpCache($link)
     {
         @set_time_limit(3600);
 
@@ -112,26 +127,26 @@ class CacheService
         return ['success' => true, 'message' => $message];
     }
 
-    public static function invalidateAll()
+    public function invalidateAll()
     {
-        CacheManager::invalidateAll();
+        $this->cacheManager->invalidateAll();
         return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Full cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
     }
 
-    private static function _handleInvalidationAndWarmup($url, $message_key)
+    private function _handleInvalidationAndWarmup($url, $message_key)
     {
         if (empty($url)) {
             return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('URL cannot be empty.', [], 'Modules.Macymedcacheboost.Admin')];
         }
-        CacheManager::invalidateUrl($url);
-        if (ConfigurationService::get('CACHEBOOST_AUTO_WARMUP')) {
-            WarmingQueueService::addToQueue($url);
+        $this->cacheManager->invalidateUrl($url);
+        if ($this->configurationService->get('AUTO_WARMUP')) {
+            $this->warmingQueueService->addUrlToQueue($url);
         }
 
         return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans($message_key, [], 'Modules.Macymedcacheboost.Admin')];
     }
 
-    public static function invalidateProductCache($id_product)
+    public function invalidateProductCache($id_product)
     {
         if (!$id_product) {
             return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid product ID.', [], 'Modules.Macymedcacheboost.Admin')];
@@ -140,12 +155,12 @@ class CacheService
         if (is_object($product) && isset($product->id)) {
             $link = Context::getContext()->link;
             $product_url = $link->getProductLink($product);
-            self::_handleInvalidationAndWarmup($product_url, 'Product cache invalidated.');
+            $this->_handleInvalidationAndWarmup($product_url, 'Product cache invalidated.');
 
             if ($product instanceof Product) {
                 foreach ($product->getCategories() as $id_category) {
                     $category_url = $link->getCategoryLink($id_category);
-                    self::_handleInvalidationAndWarmup($category_url, 'Category cache invalidated.');
+                    $this->_handleInvalidationAndWarmup($category_url, 'Category cache invalidated.');
                 }
             }
         }
@@ -153,7 +168,7 @@ class CacheService
         return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Product cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
     }
 
-    public static function invalidateCategoryCache($id_category)
+    public function invalidateCategoryCache($id_category)
     {
         if (!$id_category) {
             return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid category ID.', [], 'Modules.Macymedcacheboost.Admin')];
@@ -162,16 +177,16 @@ class CacheService
         if (is_object($category) && isset($category->id)) {
             $link = Context::getContext()->link;
             $category_url = $link->getCategoryLink($category);
-            self::_handleInvalidationAndWarmup($category_url, 'Category cache invalidated.');
+            $this->_handleInvalidationAndWarmup($category_url, 'Category cache invalidated.');
 
             $index_url = $link->getPageLink('index');
-            self::_handleInvalidationAndWarmup($index_url, 'Homepage cache invalidated.');
+            $this->_handleInvalidationAndWarmup($index_url, 'Homepage cache invalidated.');
         }
 
         return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('Category cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
     }
 
-    public static function invalidateCmsCache($id_cms)
+    public function invalidateCmsCache($id_cms)
     {
         if (!$id_cms) {
             return ['success' => false, 'message' => Context::getContext()->getTranslator()->trans('Invalid CMS ID.', [], 'Modules.Macymedcacheboost.Admin')];
@@ -179,14 +194,14 @@ class CacheService
         $cms = new CMS($id_cms);
         if (is_object($cms) && isset($cms->id)) {
             $cms_url = Context::getContext()->link->getCMSLink($cms);
-            self::_handleInvalidationAndWarmup($cms_url, 'CMS page cache invalidated.');
+            $this->_handleInvalidationAndWarmup($cms_url, 'CMS page cache invalidated.');
         }
 
         return ['success' => true, 'message' => Context::getContext()->getTranslator()->trans('CMS page cache invalidated.', [], 'Modules.Macymedcacheboost.Admin')];
     }
 
-    public static function invalidateUrl($url)
+    public function invalidateUrl($url)
     {
-        return self::_handleInvalidationAndWarmup($url, 'URL cache invalidated.');
+        return $this->_handleInvalidationAndWarmup($url, 'URL cache invalidated.');
     }
 }

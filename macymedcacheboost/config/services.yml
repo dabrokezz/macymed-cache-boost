@@ -12,6 +12,10 @@ services:
 
     macymedcacheboost.cache.service:
         class: MacymedCacheBoost\Services\CacheService
+        arguments:
+            - '@macymedcacheboost.configuration.service'
+            - '@macymedcacheboost.warming_queue.service'
+            - '@macymedcacheboost.cache_manager'
         public: true
 
     macymedcacheboost.warming_queue.service:
@@ -21,6 +25,7 @@ services:
     macymedcacheboost.admin_ajax_handler.service:
         class: MacymedCacheBoost\Services\AdminAjaxHandlerService
         public: true
+
 
     macymedcacheboost.cache_manager:
         class: MacymedCacheBoost\CacheManager
