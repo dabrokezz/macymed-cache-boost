@@ -1,28 +1,62 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
 
 {% block content %}
-<div class="panel">
-    <h3><i class="icon icon-bar-chart"></i> {{ 'Cache Statistics'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</h3>
-    <div class="row">
-        <div class="col-lg-4">
-            <strong>{{ 'Cache Engine:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</strong> <span class="badge">{{ cache_stats.engine }}</span>
-        </div>
-        <div class="col-lg-4">
-            <strong>{{ 'Cached Pages:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</strong> <span class="badge">{{ cache_stats.count }}</span>
-        </div>
-        <div class="col-lg-4">
-            <strong>{{ 'Cache Size:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</strong> <span class="badge">{{ cache_stats.size }}</span>
-        </div>
+<div class="card">
+    <div class="card-header">
+        <i class="material-icons">bar_chart</i> {{ 'Cache Statistics'|trans({}, 'Modules.Macymedcacheboost.Admin') }}
     </div>
-    <div class="row" style="margin-top: 10px;">
-        <div class="col-lg-4">
-            <strong>{{ 'Cache Hits:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</strong> <span class="badge">{{ cache_stats.hits }}</span>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">{{ 'Cache Engine'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+                        <h4 class="card-title">{{ cache_stats.engine }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">{{ 'Cached Pages'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+                        <h4 class="card-title">{{ cache_stats.count }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">{{ 'Cache Size'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+                        <h4 class="card-title">{{ cache_stats.size }}</h4>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-4">
-            <strong>{{ 'Cache Misses:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</strong> <span class="badge">{{ cache_stats.misses }}</span>
-        </div>
-        <div class="col-lg-4">
-            <strong>{{ 'Last Flush:'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</strong> <span class="badge">{{ cache_stats.last_flush }}</span>
+        <div class="row mt-4">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">{{ 'Cache Hits'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+                        <h4 class="card-title">{{ cache_stats.hits }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">{{ 'Cache Misses'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+                        <h4 class="card-title">{{ cache_stats.misses }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">{{ 'Last Flush'|trans({}, 'Modules.Macymedcacheboost.Admin') }}</p>
+                        <h4 class="card-title">{{ cache_stats.last_flush }}</h4>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
