@@ -73,8 +73,9 @@ class CacheManager
 
     private $cache_engine;
     private $redis_client;
-    private $memcached_client;
+    private a $memcached_client;
     private $isAjaxJsonRequest = false;
+    private $is_bot = false;
 
     public function __construct(ConfigurationService $configurationService)
     {
@@ -181,12 +182,11 @@ class CacheManager
         }
 
         // Check if the request is from a known bot
-        $is_bot = false;
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
             foreach ($this->bot_user_agents as $bot_ua) {
                 if (stripos($user_agent, $bot_ua) !== false) {
-                    $is_bot = true;
+                    $this->is_bot = true;
                     break;
                 }
             }
@@ -341,7 +341,7 @@ class CacheManager
     public function get($key)
     {
         $engine = $this->getEngine();
-        $duration = (int) ($this->configurationService->get('DURATION') ?? 3600);
+        $duration = $this->getDuration($key);
 
         if ($engine === 'redis') {
             $redis = $this->getRedisClient();
@@ -360,7 +360,7 @@ class CacheManager
     public function set($key, $value)
     {
         $engine = $this->getEngine();
-        $duration = (int) ($this->configurationService->get('DURATION') ?? 3600);
+        $duration = $this->getDuration($key);
 
         if ($engine === 'redis') {
             $redis = $this->getRedisClient();
@@ -382,6 +382,17 @@ class CacheManager
             mkdir($dir, 0755, true);
         if (is_writable($dir))
             file_put_contents($path, $value);
+    }
+
+    private function getDuration($key)
+    {
+        if ($this->is_bot) {
+            return (int) ($this->configurationService->get('BOT_CACHE_DURATION') ?? 86400);
+        }
+        if (strpos($key, '_asset') !== false) {
+            return (int) ($this->configurationService->get('ASSET_DURATION') ?? 86400);
+        }
+        return (int) ($this->configurationService->get('DURATION') ?? 3600);
     }
 
     private function getFilesystemCachePath($key)
