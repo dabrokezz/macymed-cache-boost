@@ -9,7 +9,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 use MacymedCacheBoost\CacheManager;
 use MacymedCacheBoost\Services\CacheService;
 use MacymedCacheBoost\Services\ConfigurationService;
-use Db;
 
 class MacymedCacheBoost extends Module
 {
